@@ -7,48 +7,40 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --pitch-dark: #0a0f2e; --accent: #f0c040; --accent-dark: #c9a030;
-    --bench: #0f1535; --bench-light: #192048;
-    --text: #f0ece4; --text-dim: #9aa0b0;
-    --red: #e05050; --green: #50c080;
-    --card-bg: #141b3a; --border: #243060;
+    --pitch-dark: #0d1b3e; --accent: #5b9bd5; --accent-dark: #3a7bbf;
+    --bench: #0a1628; --bench-light: #132040;
+    --text: #dce8f5; --text-dim: #6e8aaa;
+    --red: #c0392b; --green: #2e6da4;
+    --card-bg: #0f1e38; --border: #1e3256;
+    --highlight: #7ab3e0; --on-color: #4a90d9; --rest-color: #2563a8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: #080c1e; color: var(--text); min-height: 100vh; }
+  body { font-family: 'DM Sans', sans-serif; background: #060f1f; color: var(--text); min-height: 100vh; }
 
   header { background: var(--bench); border-bottom: 3px solid var(--accent); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
   header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; color: var(--accent); }
   .header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
   .btn { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.82rem; padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.4px; }
-  .btn-accent { background: var(--accent); color: #111; }
+  .btn-accent { background: var(--accent); color: #fff; }
   .btn-accent:hover { background: var(--accent-dark); }
   .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
   .btn-ghost:hover { background: var(--bench-light); color: var(--text); }
-  .btn-green { background: var(--green); color: #111; }
+  .btn-green { background: var(--on-color); color: #fff; }
   .btn-green:hover { opacity: 0.85; }
   .btn-red { background: var(--red); color: #fff; }
   .btn-red:hover { opacity: 0.85; }
 
-  .timer-bar { background: var(--pitch-dark); border-bottom: 2px solid #060918; padding: 10px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .timer-bar { background: var(--pitch-dark); border-bottom: 2px solid #091530; padding: 10px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
   .timer-display { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--accent); letter-spacing: 4px; min-width: 110px; }
   .timer-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
   .period-badge { background: var(--bench-light); border: 1px solid var(--border); border-radius: 6px; padding: 4px 14px; font-size: 0.85rem; color: var(--text-dim); }
   .period-badge span { color: var(--accent); font-weight: 600; }
-  .progress-bar-wrap { flex: 1; min-width: 100px; background: #060d28; border-radius: 4px; height: 8px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--accent)); border-radius: 4px; transition: width 0.5s; }
+  .progress-bar-wrap { flex: 1; min-width: 100px; background: #091530; border-radius: 4px; height: 8px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--rest-color), var(--accent)); border-radius: 4px; transition: width 0.5s; }
   .timer-controls { display: flex; gap: 8px; align-items: center; }
 
-  .alert-bar { display: none; background: #0a0f2e; border-bottom: 2px solid var(--border); padding: 8px 24px; overflow-x: auto; white-space: nowrap; }
-  .alert-bar.has-alerts { display: block; }
-  .alert-bar-inner { display: inline-flex; gap: 8px; align-items: center; }
-  .alert-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 20px; padding: 5px 13px; font-size: 0.76rem; font-weight: 600; white-space: nowrap; animation: chip-pop 0.25s ease; }
-  .alert-chip.urgent { background: var(--red); color: #fff; }
-  .alert-chip.ready  { background: var(--green); color: #111; }
-  .alert-chip.warn   { background: var(--accent); color: #111; }
-  @keyframes chip-pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-  .main { display: grid; grid-template-columns: 1fr 290px; min-height: calc(100vh - 130px); }
+  .main { display: grid; grid-template-columns: 1fr 280px; min-height: calc(100vh - 130px); }
   @media (max-width: 760px) { .main { grid-template-columns: 1fr; } .sidebar { border-left: none; border-top: 2px solid var(--border); } }
 
   .pitch-section { padding: 20px 24px; }
@@ -57,43 +49,30 @@
   .count-badge { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; background: var(--bench-light); color: var(--text-dim); border-radius: 20px; padding: 2px 10px; }
   .players-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
 
-  .player-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; position: relative; transition: border-color 0.3s, box-shadow 0.3s; }
-  .player-card.on-pitch { border-color: var(--green); }
-  .player-card.on-pitch::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--green); border-radius: 10px 10px 0 0; }
-  .player-card.resting { border-color: var(--accent); }
-  .player-card.resting::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); border-radius: 10px 10px 0 0; }
-  .player-card.overdue { border-color: var(--red) !important; animation: pulse-border 1.4s infinite; }
-  .player-card.overdue::before { background: var(--red) !important; }
-  @keyframes pulse-border {
-    0%   { box-shadow: 0 0 0 0 rgba(224,80,80,0.7); }
-    70%  { box-shadow: 0 0 0 8px rgba(224,80,80,0); }
-    100% { box-shadow: 0 0 0 0 rgba(224,80,80,0); }
-  }
-  .player-card.rested-ready { border-color: var(--green) !important; }
-  .player-card.rested-ready::before { background: var(--green) !important; }
-
+  .player-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; position: relative; }
+  .player-card.on-pitch { border-color: var(--on-color); }
+  .player-card.on-pitch::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--on-color); border-radius: 10px 10px 0 0; }
+  .player-card.resting { border-color: var(--rest-color); }
+  .player-card.resting::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--rest-color); border-radius: 10px 10px 0 0; }
   .player-name-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .player-name { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
   .player-number { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--accent); }
   .stat-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-  .stat-pill { font-size: 0.7rem; background: #080c1e; border-radius: 4px; padding: 2px 7px; color: var(--text-dim); }
+  .stat-pill { font-size: 0.7rem; background: #060f1f; border-radius: 4px; padding: 2px 7px; color: var(--text-dim); }
   .stat-pill span { color: var(--text); font-weight: 600; }
-  .stat-pill.yellow span { color: var(--accent); }
-  .card-flag { font-size: 0.68rem; font-weight: 700; border-radius: 4px; padding: 2px 7px; margin-bottom: 6px; display: inline-block; }
-  .card-flag.overdue-flag { background: rgba(224,80,80,0.18); color: var(--red); }
-  .card-flag.ready-flag   { background: rgba(80,192,128,0.18); color: var(--green); }
-  .time-bar-wrap { background: #080c1e; border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 10px; }
+  .stat-pill.yellow span { color: var(--highlight); }
+  .time-bar-wrap { background: #060f1f; border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 10px; }
   .time-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-  .time-bar-fill.good { background: var(--green); }
-  .time-bar-fill.warn { background: var(--accent); }
+  .time-bar-fill.good { background: var(--on-color); }
+  .time-bar-fill.warn { background: var(--rest-color); }
   .time-bar-fill.over { background: var(--red); }
   .card-actions { display: flex; gap: 6px; }
   .card-actions button { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; padding: 5px 6px; border: none; border-radius: 5px; cursor: pointer; transition: all 0.15s; }
-  .act-sub { background: var(--accent); color: #111; }
+  .act-sub { background: var(--accent); color: #fff; }
   .act-sub:hover { background: var(--accent-dark); }
-  .act-bench { background: #1e2a50; color: var(--text-dim); }
+  .act-bench { background: #1e3256; color: var(--text-dim); }
   .act-bench:hover { background: var(--bench-light); color: var(--text); }
-  .act-send-on { background: var(--green); color: #111; }
+  .act-send-on { background: var(--rest-color); color: #fff; }
   .act-send-on:hover { opacity: 0.85; }
 
   .sidebar { background: var(--bench); border-left: 2px solid var(--border); padding: 20px 16px; overflow-y: auto; }
@@ -101,55 +80,53 @@
   .player-list-item .name { font-weight: 600; font-size: 0.88rem; }
   .player-list-item .ptime { font-size: 0.75rem; color: var(--text-dim); }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .status-dot.on { background: var(--green); }
-  .status-dot.rest { background: var(--accent); }
+  .status-dot.on { background: var(--on-color); }
+  .status-dot.rest { background: var(--rest-color); }
   .status-dot.off { background: var(--border); }
 
-  .insight-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.82rem; }
-  .insight-card .ic-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 3px; }
-  .insight-card .ic-value { font-weight: 600; color: var(--text); }
-  .insight-card .ic-sub { font-size: 0.73rem; color: var(--text-dim); margin-top: 2px; }
-  .fairness-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
-  .suggestion-box { background: rgba(240,192,64,0.08); border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
-  .suggestion-box strong { color: var(--accent); }
-
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; }
+  /* MODALS */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--bench); border: 2px solid var(--border); border-radius: 14px; padding: 28px; width: min(460px, 96vw); max-height: 90vh; overflow-y: auto; }
   .modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; }
   .modal-subtitle { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 18px; line-height: 1.5; }
   .form-group { margin-bottom: 14px; }
   .form-group label { display: block; font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-  .form-group input { width: 100%; background: #080c1e; border: 1.5px solid var(--border); border-radius: 7px; color: var(--text); padding: 9px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.15s; }
+  .form-group input { width: 100%; background: #111822; border: 1.5px solid var(--border); border-radius: 7px; color: var(--text); padding: 9px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.15s; }
   .form-group input:focus { border-color: var(--accent); }
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 
+  /* ROSTER */
   .roster-edit-list { margin-bottom: 16px; }
   .roster-row { display: grid; grid-template-columns: 44px 1fr auto auto; gap: 7px; align-items: center; margin-bottom: 8px; }
-  .roster-row input { background: #080c1e; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; width: 100%; }
+  .roster-row input { background: #111822; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; width: 100%; }
   .roster-row input:focus { border-color: var(--accent); }
   .remove-player { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.1rem; padding: 4px; opacity: 0.7; transition: opacity 0.15s; line-height:1; }
   .remove-player:hover { opacity: 1; }
   .add-player-row { display: flex; gap: 8px; margin-bottom: 16px; }
-  .add-player-row input { background: #080c1e; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; }
+  .add-player-row input { background: #111822; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; }
   .add-player-row input:focus { border-color: var(--accent); }
   .add-player-row .name-in { flex: 1; }
   .add-player-row .num-in { width: 58px; }
 
+  /* AVAILABILITY TOGGLE */
   .avail-toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
   .avail-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .avail-slider { position: absolute; inset: 0; background: #1e2a50; border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+  .avail-slider { position: absolute; inset: 0; background: #2e3e54; border-radius: 20px; cursor: pointer; transition: background 0.2s; }
   .avail-slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-  .avail-toggle input:checked + .avail-slider { background: var(--green); }
+  .avail-toggle input:checked + .avail-slider { background: var(--on-color); }
   .avail-toggle input:checked + .avail-slider::before { transform: translateX(16px); }
+  .roster-avail-label { font-size: 0.65rem; text-align: center; color: var(--text-dim); margin-top: 2px; }
 
+  /* SUB PICKER */
   .sub-picker-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .sub-pick-item { background: #080c1e; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.15s; }
-  .sub-pick-item:hover { border-color: var(--accent); background: #0f1535; }
+  .sub-pick-item { background: #111822; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.15s; }
+  .sub-pick-item:hover { border-color: var(--accent); background: #1a2235; }
   .sub-pick-item .spi-name { font-weight: 600; font-size: 0.9rem; }
   .sub-pick-item .spi-time { font-size: 0.75rem; color: var(--text-dim); }
 
-  #lineupScreen { display: none; position: fixed; inset: 0; z-index: 400; background: #080c1e; overflow-y: auto; }
+  /* ── LINEUP SCREEN ── */
+  #lineupScreen { display: none; position: fixed; inset: 0; z-index: 400; background: #111822; overflow-y: auto; }
   #lineupScreen.show { display: block; }
   .lineup-header { background: var(--bench); border-bottom: 3px solid var(--accent); padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
   .lineup-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); letter-spacing: 3px; }
@@ -162,10 +139,10 @@
 
   .lineup-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: border-color 0.15s, background 0.15s; user-select: none; }
   .lineup-card:hover:not(.unavail) { border-color: var(--text-dim); }
-  .lineup-card.selected { border-color: var(--green); background: #0f2030; }
+  .lineup-card.selected { border-color: var(--on-color); background: #0d1e3a; }
   .lineup-card.unavail { opacity: 0.4; cursor: not-allowed; }
   .lc-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; background: transparent; position: relative; transition: all 0.15s; }
-  .lineup-card.selected .lc-check { background: var(--green); border-color: var(--green); }
+  .lineup-card.selected .lc-check { background: var(--on-color); border-color: var(--on-color); }
   .lc-check::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: #111; opacity: 0; transition: opacity 0.15s; }
   .lineup-card.selected .lc-check::after { opacity: 1; }
   .lc-name { font-weight: 600; font-size: 0.92rem; }
@@ -174,18 +151,32 @@
   .lineup-select-all { background: none; border: 1px dashed var(--border); color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
   .lineup-select-all:hover { border-color: var(--text-dim); color: var(--text); }
 
-  .half-time-banner { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
+  /* HALF TIME */
+  .half-time-banner { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
   .half-time-banner.show { display: flex; }
-  .ht-title { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: var(--accent); letter-spacing: 8px; animation: pulse 1s infinite alternate; }
+  .ht-title { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: var(--highlight); letter-spacing: 8px; animation: pulse 1s infinite alternate; }
   @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
 
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bench); border: 1.5px solid var(--accent); border-radius: 10px; padding: 12px 20px; font-size: 0.88rem; color: var(--text); z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
-  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bench); border: 1.5px solid var(--accent); border-radius: 10px; padding: 12px 20px; font-size: 0.88rem; color: var(--text); z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.3s; }  .toast.show { transform: translateY(0); opacity: 1; }
 
   .fairness-bar { margin-bottom: 14px; }
   .fairness-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
-  .fairness-track { background: #080c1e; border-radius: 4px; height: 6px; overflow: hidden; }
+  .fairness-track { background: #060f1f; border-radius: 4px; height: 6px; overflow: hidden; }
   .fairness-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+  .insight-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .insight-card.warn { border-left-color: #e07b30; }
+  .insight-card.alert { border-left-color: var(--red); }
+  .insight-card.good { border-left-color: var(--on-color); }
+  .insight-card.info { border-left-color: var(--rest-color); }
+  .insight-title { font-weight: 600; font-size: 0.82rem; margin-bottom: 3px; }
+  .insight-card.warn .insight-title { color: #e07b30; }
+  .insight-card.alert .insight-title { color: #e05050; }
+  .insight-card.good .insight-title { color: var(--highlight); }
+  .insight-card.info .insight-title { color: var(--accent); }
+  .insight-body { font-size: 0.76rem; color: var(--text-dim); line-height: 1.45; }
+  .insight-body strong { color: var(--text); }
+  .no-insights { font-size: 0.82rem; color: var(--text-dim); font-style: italic; padding: 4px 0; }
 
   .empty-state { color: var(--text-dim); font-size: 0.85rem; padding: 10px 0; font-style: italic; }
 </style>
@@ -220,29 +211,35 @@
   </div>
 </div>
 
-<div class="alert-bar" id="alertBar">
-  <div class="alert-bar-inner" id="alertBarInner"></div>
-</div>
-
 <div class="main">
   <div class="pitch-section">
     <div class="section-title">On Pitch <span class="count-badge" id="onCount">0</span></div>
     <div class="players-grid" id="onPitchGrid"></div>
+
     <div class="section-title" style="margin-top:24px">Resting <span class="count-badge" id="restCount">0</span></div>
     <div class="players-grid" id="restingGrid"></div>
+
     <div class="section-title" style="margin-top:24px">Bench <span class="count-badge" id="benchCount">0</span></div>
     <div class="players-grid" id="benchGrid"></div>
   </div>
+
   <div class="sidebar">
     <div class="section-title" style="margin-bottom:12px">Insights</div>
     <div id="insightsList"></div>
-    <div class="section-title" style="margin-top:16px;margin-bottom:12px">Fairness</div>
+
+    <div class="section-title" style="margin-top:18px;margin-bottom:12px">Game Time</div>
     <div id="fairnessList"></div>
-    <div class="section-title" style="margin-top:16px;margin-bottom:12px">All Players</div>
+
+    <div class="section-title" style="margin-top:18px;margin-bottom:10px">Quick Actions</div>
+    <button class="btn btn-accent" style="width:100%;margin-bottom:8px" onclick="dashAutoFill()">&#9889; Auto-fill Lineup</button>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:16px" onclick="openLineup()">&#128203; Edit Lineup</button>
+
+    <div class="section-title" style="margin-bottom:12px">All Players</div>
     <div id="allPlayersList"></div>
   </div>
 </div>
 
+<!-- ── LINEUP SCREEN ── -->
 <div id="lineupScreen">
   <div class="lineup-header">
     <h2>📋 Starting Lineup</h2>
@@ -263,12 +260,14 @@
   </div>
 </div>
 
+<!-- HALF TIME -->
 <div class="half-time-banner" id="halfTimeBanner">
   <div class="ht-title">HALF TIME</div>
   <p style="color:var(--text-dim);font-size:1rem;">Check fairness, make changes, then kick off.</p>
   <button class="btn btn-accent" style="font-size:1rem;padding:12px 28px;" onclick="startSecondHalf()">▶ Start 2nd Half</button>
 </div>
 
+<!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal">
     <h2>Game Settings</h2>
@@ -291,6 +290,7 @@
   </div>
 </div>
 
+<!-- ROSTER MODAL -->
 <div class="modal-overlay" id="rosterModal">
   <div class="modal">
     <h2>Manage Roster</h2>
@@ -308,6 +308,7 @@
   </div>
 </div>
 
+<!-- SUB MODAL -->
 <div class="modal-overlay" id="subModal">
   <div class="modal">
     <h2>Substitution</h2>
@@ -323,7 +324,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── STATE ──────────────────────────────────────────────────────
 let settings = { halfDuration: 20, maxOnPitch: 7, restTarget: 5 };
+
 let players = [
   {id:1,name:'Alice',number:1,available:true},
   {id:2,name:'Ben',number:2,available:true},
@@ -337,7 +340,8 @@ let players = [
   {id:10,name:'Jake',number:10,available:true},
   {id:11,name:'Kira',number:11,available:true},
 ];
-let playerState = {};
+
+let playerState = {};   // id → { status, gameSeconds, restSeconds, subsCount }
 let nextId = 12;
 let timerRunning = false;
 let gameSeconds = 0;
@@ -347,6 +351,7 @@ let subTargetId = null;
 let pendingRosterEdits = [];
 let lineupSelection = new Set();
 
+// ── INIT ──────────────────────────────────────────────────────
 function initPlayerState() {
   players.forEach(p => {
     if (!playerState[p.id]) {
@@ -355,6 +360,7 @@ function initPlayerState() {
   });
 }
 
+// ── TIMER ─────────────────────────────────────────────────────
 function toggleTimer() {
   timerRunning = !timerRunning;
   const btn = document.getElementById('startStopBtn');
@@ -403,116 +409,9 @@ function endGame() {
   showToast('Game over! Well done coach! 🏆');
 }
 
-function getOverdueThreshold() {
-  return (settings.halfDuration * 60) / 2;
-}
-
-function isOverdue(p) {
-  const s = playerState[p.id];
-  if (s.status !== 'on') return false;
-  return s.gameSeconds > getOverdueThreshold();
-}
-
-function isRestedEnough(p) {
-  const s = playerState[p.id];
-  if (s.status !== 'resting') return false;
-  return s.restSeconds >= settings.restTarget * 60;
-}
-
-function renderAlerts() {
-  const chips = [];
-  const onCount = players.filter(p => playerState[p.id].status === 'on').length;
-  if (onCount < settings.maxOnPitch) {
-    chips.push({ type: 'warn', text: `⚠️ Pitch not full (${onCount}/${settings.maxOnPitch})` });
-  }
-  players.filter(p => isOverdue(p)).forEach(p => {
-    chips.push({ type: 'urgent', text: `⏰ ${p.name} due a rest` });
-  });
-  players.filter(p => isRestedEnough(p)).forEach(p => {
-    chips.push({ type: 'ready', text: `✅ ${p.name} ready to come on` });
-  });
-  const bar   = document.getElementById('alertBar');
-  const inner = document.getElementById('alertBarInner');
-  inner.innerHTML = '';
-  if (chips.length === 0) { bar.classList.remove('has-alerts'); return; }
-  bar.classList.add('has-alerts');
-  chips.forEach(c => {
-    const chip = document.createElement('div');
-    chip.className = `alert-chip ${c.type}`;
-    chip.textContent = c.text;
-    inner.appendChild(chip);
-  });
-}
-
-function renderInsights() {
-  const il = document.getElementById('insightsList');
-  il.innerHTML = '';
-  const active = players.filter(p => p.available !== false);
-  if (active.length === 0) { il.innerHTML = '<div class="empty-state">No players.</div>'; return; }
-  const onPitch = active.filter(p => playerState[p.id].status === 'on');
-  const resting = active.filter(p => playerState[p.id].status === 'resting');
-
-  if (onPitch.length > 0) {
-    const longest = onPitch.reduce((a, b) =>
-      playerState[a.id].gameSeconds >= playerState[b.id].gameSeconds ? a : b);
-    const overdue = isOverdue(longest);
-    il.innerHTML += `
-      <div class="insight-card">
-        <div class="ic-label">⏱ Longest on pitch</div>
-        <div class="ic-value">${longest.name} <span style="color:${overdue ? 'var(--red)' : 'var(--text-dim)'}">
-          ${overdue ? '🔴' : ''} ${fmtTime(playerState[longest.id].gameSeconds)}</span></div>
-        ${overdue ? '<div class="ic-sub" style="color:var(--red)">Consider subbing off</div>' : ''}
-      </div>`;
-  }
-
-  if (resting.length > 0) {
-    const longestRest = resting.reduce((a, b) =>
-      playerState[a.id].restSeconds >= playerState[b.id].restSeconds ? a : b);
-    const ready = isRestedEnough(longestRest);
-    il.innerHTML += `
-      <div class="insight-card">
-        <div class="ic-label">💤 Resting longest</div>
-        <div class="ic-value">${longestRest.name} — ${fmtTime(playerState[longestRest.id].restSeconds)}
-          ${ready ? '<span style="color:var(--green);font-size:0.72rem;margin-left:5px">✅ Ready!</span>' : ''}
-        </div>
-      </div>`;
-  }
-
-  const times = active.map(p => playerState[p.id].gameSeconds);
-  const maxT  = Math.max(...times);
-  const minT  = Math.min(...times);
-  const score = maxT === 0 ? 100 : Math.round((minT / maxT) * 100);
-  const scoreCol = score > 75 ? 'var(--green)' : score > 50 ? 'var(--accent)' : 'var(--red)';
-  il.innerHTML += `
-    <div class="insight-card">
-      <div class="ic-label">⚖️ Fairness Score</div>
-      <div class="fairness-score" style="color:${scoreCol}">${score}%</div>
-      <div class="ic-sub">${score > 75 ? 'Well balanced!' : score > 50 ? 'Some imbalance' : 'Very uneven — rotate soon'}</div>
-    </div>`;
-
-  if (onPitch.length > 0) {
-    const bench = active.filter(p =>
-      playerState[p.id].status === 'resting' || playerState[p.id].status === 'off');
-    const subOff = onPitch.reduce((a, b) =>
-      playerState[a.id].gameSeconds >= playerState[b.id].gameSeconds ? a : b);
-    if (bench.length > 0) {
-      const sorted = [...bench].sort((a, b) => {
-        const sa = playerState[a.id], sb = playerState[b.id];
-        if (sa.status !== sb.status) return sa.status === 'resting' ? -1 : 1;
-        return sa.gameSeconds - sb.gameSeconds;
-      });
-      const subOn = sorted[0];
-      il.innerHTML += `
-        <div class="suggestion-box">
-          💡 <strong>Suggested sub:</strong><br>
-          Off → ${subOff.name} (#${subOff.number})<br>
-          On &nbsp;→ ${subOn.name} (#${subOn.number})
-        </div>`;
-    }
-  }
-}
-
+// ── LINEUP PICKER ─────────────────────────────────────────────
 function openLineup() {
+  // Pre-select whoever is already on pitch
   lineupSelection = new Set(
     players.filter(p => playerState[p.id]?.status === 'on').map(p => p.id)
   );
@@ -529,8 +428,10 @@ function renderLineupGrid() {
   document.getElementById('lineupMax').textContent      = max;
   document.getElementById('lineupMaxLabel').textContent = max;
   document.getElementById('lineupCount').textContent    = lineupSelection.size;
+
   const grid = document.getElementById('lineupGrid');
   grid.innerHTML = '';
+
   players.forEach(p => {
     const avail = p.available !== false;
     const sel   = lineupSelection.has(p.id);
@@ -541,7 +442,8 @@ function renderLineupGrid() {
       <div>
         <div class="lc-name">${p.name}</div>
         <div class="lc-num">#${p.number}${!avail ? ' · Unavailable' : ''}</div>
-      </div>`;
+      </div>
+    `;
     if (avail) card.onclick = () => toggleLineupPlayer(p.id);
     grid.appendChild(card);
   });
@@ -568,13 +470,17 @@ function autoFillLineup() {
 }
 
 function confirmLineup() {
-  if (lineupSelection.size === 0) { showToast('Pick at least 1 player to start.'); return; }
+  if (lineupSelection.size === 0) {
+    showToast('Pick at least 1 player to start.');
+    return;
+  }
+  // Apply: selected → on, rest → off (reset rest timer)
   players.forEach(p => {
     const s = playerState[p.id];
     if (lineupSelection.has(p.id)) {
       s.status = 'on';
     } else {
-      if (s.status === 'on') s.status = 'off';
+      if (s.status === 'on') s.status = 'off'; // only change if was on
       s.restSeconds = 0;
     }
   });
@@ -583,11 +489,12 @@ function confirmLineup() {
   showToast(`✅ Lineup set — ${lineupSelection.size} on pitch.`);
 }
 
+// ── SUBSTITUTION ──────────────────────────────────────────────
 function openSubModal(playerId) {
   subTargetId = playerId;
   const p = players.find(x => x.id === playerId);
-  document.getElementById('subOutName').textContent = \
-    `${p.name} (#${p.number})`;
+  document.getElementById('subOutName').textContent = `${p.name} (#${p.number})`;
+
   const available = players.filter(pl => {
     const s = playerState[pl.id];
     return pl.id !== playerId && pl.available !== false &&
@@ -597,6 +504,7 @@ function openSubModal(playerId) {
     if (sa.status !== sb.status) return sa.status === 'resting' ? -1 : 1;
     return sa.gameSeconds - sb.gameSeconds;
   });
+
   const list = document.getElementById('subPickerList');
   list.innerHTML = '';
   if (available.length === 0) {
@@ -627,31 +535,38 @@ function doSub(inId) {
   renderAll();
 }
 
-function sendOff(id) { playerState[id].status = 'off'; renderAll(); }
+function sendOff(id) {
+  playerState[id].status = 'off';
+  renderAll();
+}
 
 function sendOn(id) {
   const onCount = players.filter(p => playerState[p.id].status === 'on').length;
-  if (onCount >= settings.maxOnPitch) { showToast(`Pitch full! Max ${settings.maxOnPitch}.`); return; }
+  if (onCount >= settings.maxOnPitch) {
+    showToast(`Pitch full! Max ${settings.maxOnPitch}.`);
+    return;
+  }
   playerState[id].status = 'on';
   playerState[id].restSeconds = 0;
   renderAll();
 }
 
-function renderAll() { renderPitch(); renderSidebar(); renderAlerts(); }
+// ── RENDER ────────────────────────────────────────────────────
+function renderAll() { renderPitch(); renderSidebar(); }
 
 function fmtTime(secs) {
-  return \
-    \
-      `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+  return `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
 }
 
 function renderPitch() {
   const onPitch = players.filter(p => playerState[p.id].status === 'on');
   const resting = players.filter(p => playerState[p.id].status === 'resting');
   const bench   = players.filter(p => p.available !== false && playerState[p.id].status === 'off');
+
   document.getElementById('onCount').textContent    = onPitch.length;
   document.getElementById('restCount').textContent  = resting.length;
   document.getElementById('benchCount').textContent = bench.length;
+
   const ts = settings.halfDuration * 60;
   const grids = [
     ['onPitchGrid', onPitch, 'on'],
@@ -661,7 +576,10 @@ function renderPitch() {
   grids.forEach(([id, list, status]) => {
     const el = document.getElementById(id);
     el.innerHTML = '';
-    if (list.length === 0) { el.innerHTML = '<div class="empty-state">None</div>'; return; }
+    if (list.length === 0) {
+      el.innerHTML = '<div class="empty-state">None</div>';
+      return;
+    }
     list.forEach(p => el.appendChild(buildCard(p, status, ts)));
   });
 }
@@ -671,14 +589,9 @@ function buildCard(p, status, totalSecs) {
   const card = document.createElement('div');
   const pct  = Math.min(100, (s.gameSeconds / Math.max(1, totalSecs)) * 100);
   const barC = pct < 40 ? 'warn' : pct < 95 ? 'good' : 'over';
-  const overdue     = status === 'on'      && isOverdue(p);
-  const restedReady = status === 'resting' && isRestedEnough(p);
-  let cardClass = 'player-card';
-  if (status === 'on')      cardClass += overdue ? ' on-pitch overdue' : ' on-pitch';
-  if (status === 'resting') cardClass += restedReady ? ' rested-ready' : ' resting';
-  let flagHTML = '';
-  if (overdue)     flagHTML = '<div class="card-flag overdue-flag">⏰ Due a rest</div>';
-  if (restedReady) flagHTML = '<div class="card-flag ready-flag">✅ Ready to come on</div>';
+
+  card.className = `player-card${status === 'on' ? ' on-pitch' : status === 'resting' ? ' resting' : ''}`;
+
   let actionsHTML;
   if (status === 'on') {
     actionsHTML = `<button class="act-sub" onclick="openSubModal(${p.id})">↕ Sub</button>
@@ -686,13 +599,12 @@ function buildCard(p, status, totalSecs) {
   } else {
     actionsHTML = `<button class="act-send-on" onclick="sendOn(${p.id})">▶ Send On</button>`;
   }
-  card.className = cardClass;
+
   card.innerHTML = `
     <div class="player-name-row">
       <span class="player-name">${p.name}</span>
       <span class="player-number">${p.number}</span>
     </div>
-    ${flagHTML}
     <div class="stat-row">
       <div class="stat-pill">⏱ <span>${fmtTime(s.gameSeconds)}</span></div>
       ${status === 'resting'
@@ -700,32 +612,62 @@ function buildCard(p, status, totalSecs) {
         : `<div class="stat-pill">Subs <span>${s.subsCount}</span></div>`}
     </div>
     <div class="time-bar-wrap"><div class="time-bar-fill ${barC}" style="width:${pct}%"></div></div>
-    <div class="card-actions">${actionsHTML}</div>`;
+    <div class="card-actions">${actionsHTML}</div>
+  `;
   return card;
 }
 
 function renderSidebar() {
-  renderInsights();
   const active = players.filter(p => p.available !== false);
+  const totalHalfSecs = settings.halfDuration * 60;
+  const totalGameSecs = totalHalfSecs * 2;
+
+  // ── INSIGHTS ────────────────────────────────────────────────
+  const il = document.getElementById('insightsList');
+  il.innerHTML = '';
+  const insights = generateInsights(active, totalHalfSecs, totalGameSecs);
+  if (insights.length === 0) {
+    il.innerHTML = '<div class="no-insights">No alerts right now. Game looking good!</div>';
+  } else {
+    insights.forEach(ins => {
+      il.innerHTML += `
+        <div class="insight-card ${ins.type}">
+          <div class="insight-title">${ins.icon} ${ins.title}</div>
+          <div class="insight-body">${ins.body}</div>
+        </div>`;
+    });
+  }
+
+  // ── GAME TIME FAIRNESS BARS ──────────────────────────────────
   const maxSec = Math.max(1, ...active.map(p => playerState[p.id].gameSeconds));
   const fl = document.getElementById('fairnessList');
   fl.innerHTML = '';
   [...active].sort((a,b) => playerState[b.id].gameSeconds - playerState[a.id].gameSeconds)
     .forEach(p => {
-      const s   = playerState[p.id];
-      const pct = Math.min(100, (s.gameSeconds / maxSec) * 100);
-      const col = pct > 80 ? 'var(--green)' : pct > 40 ? 'var(--accent)' : 'var(--red)';
+      const s    = playerState[p.id];
+      const pct  = Math.min(100, (s.gameSeconds / Math.max(1, maxSec)) * 100);
+      const ideal = totalHalfSecs * half;
+      const behindSecs = Math.max(0, (ideal * 0.6) - s.gameSeconds);
+      const col  = behindSecs > 120 ? '#c0392b' : pct > 70 ? '#4a90d9' : '#2563a8';
+      const statusIcon = s.status === 'on' ? '●' : s.status === 'resting' ? '◐' : '○';
       fl.innerHTML += `
         <div class="fairness-bar">
-          <div class="fairness-label"><span>#${p.number} ${p.name}</span><span>${fmtTime(s.gameSeconds)}</span></div>
-          <div class="fairness-track"><div class="fairness-fill" style="width:${pct}%;background:${col}"></div></div>
+          <div class="fairness-label">
+            <span>${statusIcon} #${p.number} ${p.name}</span>
+            <span>${fmtTime(s.gameSeconds)}</span>
+          </div>
+          <div class="fairness-track">
+            <div class="fairness-fill" style="width:${pct}%;background:${col}"></div>
+          </div>
         </div>`;
     });
+
+  // ── ALL PLAYERS LIST ─────────────────────────────────────────
   const al = document.getElementById('allPlayersList');
   al.innerHTML = '';
   players.forEach(p => {
-    const s = playerState[p.id];
-    const dotC = s.status === 'on' ? 'on' : s.status === 'resting' ? 'rest' : 'off';
+    const s     = playerState[p.id];
+    const dotC  = s.status === 'on' ? 'on' : s.status === 'resting' ? 'rest' : 'off';
     const unavTag = p.available === false
       ? '<span style="font-size:0.7rem;color:var(--red);margin-left:5px">✗ out</span>' : '';
     al.innerHTML += `
@@ -739,6 +681,128 @@ function renderSidebar() {
   });
 }
 
+function generateInsights(active, halfSecs, totalGameSecs) {
+  const insights = [];
+  const onPitch  = active.filter(p => playerState[p.id].status === 'on');
+  const resting  = active.filter(p => playerState[p.id].status === 'resting');
+  const bench    = active.filter(p => playerState[p.id].status === 'off');
+
+  if (active.length === 0) return insights;
+
+  const times      = active.map(p => playerState[p.id].gameSeconds);
+  const maxT       = Math.max(...times);
+  const minT       = Math.min(...times);
+  const avgT       = Math.round(times.reduce((a,b)=>a+b,0) / times.length);
+  const gapSecs    = maxT - minT;
+  const elapsedTotal = gameSeconds + (half === 2 ? halfSecs : 0);
+
+  // 1. Big fairness gap
+  if (gapSecs > 300 && elapsedTotal > 120) {
+    const mostP  = active.find(p => playerState[p.id].gameSeconds === maxT);
+    const leastP = active.find(p => playerState[p.id].gameSeconds === minT);
+    insights.push({
+      type: 'alert', icon: '⚠',
+      title: 'Large Playing Time Gap',
+      body: `<strong>${mostP.name}</strong> has ${fmtTime(gapSecs)} more game time than <strong>${leastP.name}</strong>. Consider rotating soon.`
+    });
+  } else if (gapSecs > 120 && elapsedTotal > 120) {
+    const leastP = active.find(p => playerState[p.id].gameSeconds === minT);
+    insights.push({
+      type: 'warn', icon: '↕',
+      title: 'Uneven Playing Time',
+      body: `<strong>${leastP.name}</strong> has the least time (${fmtTime(minT)}). Average is ${fmtTime(avgT)}.`
+    });
+  }
+
+  // 2. Players resting too long
+  const restTargetSecs = settings.restTarget * 60;
+  resting.forEach(p => {
+    const s = playerState[p.id];
+    if (s.restSeconds > restTargetSecs) {
+      insights.push({
+        type: 'warn', icon: '⏳',
+        title: `${p.name} Resting Too Long`,
+        body: `Resting for <strong>${fmtTime(s.restSeconds)}</strong> — target is ${settings.restTarget} min. Ready to come back on.`
+      });
+    }
+  });
+
+  // 3. Players on bench with no game time yet
+  const noTimeBench = bench.filter(p => playerState[p.id].gameSeconds === 0);
+  if (noTimeBench.length > 0 && elapsedTotal > 180) {
+    insights.push({
+      type: 'alert', icon: '🪑',
+      title: `${noTimeBench.length} Player${noTimeBench.length > 1 ? 's' : ''} Not Yet On`,
+      body: noTimeBench.map(p => `<strong>${p.name}</strong>`).join(', ') + ` ${noTimeBench.length > 1 ? 'have' : 'has'} had no game time yet.`
+    });
+  }
+
+  // 4. Good balance
+  if (gapSecs <= 60 && elapsedTotal > 120 && insights.length === 0) {
+    insights.push({
+      type: 'good', icon: '✓',
+      title: 'Playing Time Balanced',
+      body: `All players within <strong>${fmtTime(gapSecs)}</strong> of each other. Great rotation!`
+    });
+  }
+
+  // 5. Half-time sub suggestion (only in 1st half)
+  if (half === 1 && bench.length > 0) {
+    const timeLeft = halfSecs - gameSeconds;
+    if (timeLeft > 0 && timeLeft < 300) {
+      insights.push({
+        type: 'info', icon: '🔄',
+        title: 'Half Time Approaching',
+        body: `~${Math.ceil(timeLeft/60)} min left. Good time to plan 2nd half rotations.`
+      });
+    }
+  }
+
+  // 6. Pitch under-filled
+  if (onPitch.length < settings.maxOnPitch && active.length >= settings.maxOnPitch) {
+    const shortage = settings.maxOnPitch - onPitch.length;
+    insights.push({
+      type: 'warn', icon: '👥',
+      title: 'Pitch Under-filled',
+      body: `${shortage} spot${shortage > 1 ? 's' : ''} available. Use Auto-fill or send bench players on.`
+    });
+  }
+
+  return insights;
+}
+
+// ── DASHBOARD AUTO-FILL ───────────────────────────────────────
+function dashAutoFill() {
+  const available = players.filter(p => p.available !== false);
+  const onPitch   = players.filter(p => playerState[p.id].status === 'on');
+  const needed    = settings.maxOnPitch - onPitch.length;
+
+  if (needed <= 0) {
+    showToast(`Pitch already full (${settings.maxOnPitch} players).`);
+    return;
+  }
+
+  // Fill from bench sorted by least game time
+  const bench = available
+    .filter(p => playerState[p.id].status === 'off')
+    .sort((a,b) => playerState[a.id].gameSeconds - playerState[b.id].gameSeconds);
+
+  const toAdd = bench.slice(0, needed);
+  if (toAdd.length === 0) {
+    showToast('No bench players available to add.');
+    return;
+  }
+
+  toAdd.forEach(p => {
+    playerState[p.id].status = 'on';
+    playerState[p.id].restSeconds = 0;
+  });
+
+  renderAll();
+  showToast(`Added ${toAdd.length} player${toAdd.length > 1 ? 's' : ''} to pitch.`);
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────
 function openSettings() {
   document.getElementById('halfDurationInput').value = settings.halfDuration;
   document.getElementById('maxOnPitchInput').value   = settings.maxOnPitch;
@@ -754,6 +818,7 @@ function saveSettings() {
   showToast('Settings saved!');
 }
 
+// ── ROSTER ────────────────────────────────────────────────────
 function openRoster() {
   pendingRosterEdits = players.map(p => ({...p}));
   renderRosterEditList();
@@ -777,12 +842,16 @@ function renderRosterEditList() {
           onchange="pendingRosterEdits[${i}].available=this.checked">
         <span class="avail-slider"></span>
       </label>
-      <button class="remove-player" onclick="removePendingPlayer(${i})">✕</button>`;
+      <button class="remove-player" onclick="removePendingPlayer(${i})">✕</button>
+    `;
     list.appendChild(row);
   });
 }
 
-function removePendingPlayer(i) { pendingRosterEdits.splice(i, 1); renderRosterEditList(); }
+function removePendingPlayer(i) {
+  pendingRosterEdits.splice(i, 1);
+  renderRosterEditList();
+}
 
 function addPlayer() {
   const name = document.getElementById('newPlayerNameInput').value.trim();
@@ -809,6 +878,7 @@ function saveRoster() {
   showToast('Roster saved!');
 }
 
+// ── RESET ─────────────────────────────────────────────────────
 function resetGame() {
   if (!confirm('Start a new game? All times will be reset.')) return;
   if (timerRunning) toggleTimer();
@@ -819,6 +889,7 @@ function resetGame() {
   openLineup();
 }
 
+// ── UTILS ─────────────────────────────────────────────────────
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(m =>
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); })
@@ -831,10 +902,11 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
+// ── BOOT ──────────────────────────────────────────────────────
 initPlayerState();
 renderTimer();
 renderAll();
-openLineup();
+openLineup(); // start with lineup picker
 </script>
 </body>
 </html>
