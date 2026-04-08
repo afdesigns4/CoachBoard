@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pitch-dark: #0a0f2e; --accent: #f0c040; --accent-dark: #c9a030;
+    --bench: #0f1535; --bench-light: #192048;
+    --text: #f0ece4; --text-dim: #9aa0b0;
+    --red: #e05050; --green: #50c080;
+    --card-bg: #141b3a; --border: #243060;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #080c1e; color: var(--text); min-height: 100vh; }
+
+  header { background: var(--bench); border-bottom: 3px solid var(--accent); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; color: var(--accent); }
+  .header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .btn { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.82rem; padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.4px; }
+  .btn-accent { background: var(--accent); color: #111; }
+  .btn-accent:hover { background: var(--accent-dark); }
+  .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bench-light); color: var(--text); }
+  .btn-green { background: var(--green); color: #111; }
+  .btn-green:hover { opacity: 0.85; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { opacity: 0.85; }
+
+  .timer-bar { background: var(--pitch-dark); border-bottom: 2px solid #060918; padding: 10px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .timer-display { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--accent); letter-spacing: 4px; min-width: 110px; }
+  .timer-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  .period-badge { background: var(--bench-light); border: 1px solid var(--border); border-radius: 6px; padding: 4px 14px; font-size: 0.85rem; color: var(--text-dim); }
+  .period-badge span { color: var(--accent); font-weight: 600; }
+  .progress-bar-wrap { flex: 1; min-width: 100px; background: #060d28; border-radius: 4px; height: 8px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--accent)); border-radius: 4px; transition: width 0.5s; }
+  .timer-controls { display: flex; gap: 8px; align-items: center; }
+
+  .alert-bar { display: none; background: #0a0f2e; border-bottom: 2px solid var(--border); padding: 8px 24px; overflow-x: auto; white-space: nowrap; }
+  .alert-bar.has-alerts { display: block; }
+  .alert-bar-inner { display: inline-flex; gap: 8px; align-items: center; }
+  .alert-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 20px; padding: 5px 13px; font-size: 0.76rem; font-weight: 600; white-space: nowrap; animation: chip-pop 0.25s ease; }
+  .alert-chip.urgent { background: var(--red); color: #fff; }
+  .alert-chip.ready  { background: var(--green); color: #111; }
+  .alert-chip.warn   { background: var(--accent); color: #111; }
+  @keyframes chip-pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .main { display: grid; grid-template-columns: 1fr 290px; min-height: calc(100vh - 130px); }
+  @media (max-width: 760px) { .main { grid-template-columns: 1fr; } .sidebar { border-left: none; border-top: 2px solid var(--border); } }
+
+  .pitch-section { padding: 20px 24px; }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .count-badge { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; background: var(--bench-light); color: var(--text-dim); border-radius: 20px; padding: 2px 10px; }
+  .players-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
+
+  .player-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; position: relative; transition: border-color 0.3s, box-shadow 0.3s; }
+  .player-card.on-pitch { border-color: var(--green); }
+  .player-card.on-pitch::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--green); border-radius: 10px 10px 0 0; }
+  .player-card.resting { border-color: var(--accent); }
+  .player-card.resting::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); border-radius: 10px 10px 0 0; }
+  .player-card.overdue { border-color: var(--red) !important; animation: pulse-border 1.4s infinite; }
+  .player-card.overdue::before { background: var(--red) !important; }
+  @keyframes pulse-border {
+    0%   { box-shadow: 0 0 0 0 rgba(224,80,80,0.7); }
+    70%  { box-shadow: 0 0 0 8px rgba(224,80,80,0); }
+    100% { box-shadow: 0 0 0 0 rgba(224,80,80,0); }
+  }
+  .player-card.rested-ready { border-color: var(--green) !important; }
+  .player-card.rested-ready::before { background: var(--green) !important; }
+
+  .player-name-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .player-name { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+  .player-number { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--accent); }
+  .stat-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .stat-pill { font-size: 0.7rem; background: #080c1e; border-radius: 4px; padding: 2px 7px; color: var(--text-dim); }
+  .stat-pill span { color: var(--text); font-weight: 600; }
+  .stat-pill.yellow span { color: var(--accent); }
+  .card-flag { font-size: 0.68rem; font-weight: 700; border-radius: 4px; padding: 2px 7px; margin-bottom: 6px; display: inline-block; }
+  .card-flag.overdue-flag { background: rgba(224,80,80,0.18); color: var(--red); }
+  .card-flag.ready-flag   { background: rgba(80,192,128,0.18); color: var(--green); }
+  .time-bar-wrap { background: #080c1e; border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 10px; }
+  .time-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .time-bar-fill.good { background: var(--green); }
+  .time-bar-fill.warn { background: var(--accent); }
+  .time-bar-fill.over { background: var(--red); }
+  .card-actions { display: flex; gap: 6px; }
+  .card-actions button { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; padding: 5px 6px; border: none; border-radius: 5px; cursor: pointer; transition: all 0.15s; }
+  .act-sub { background: var(--accent); color: #111; }
+  .act-sub:hover { background: var(--accent-dark); }
+  .act-bench { background: #1e2a50; color: var(--text-dim); }
+  .act-bench:hover { background: var(--bench-light); color: var(--text); }
+  .act-send-on { background: var(--green); color: #111; }
+  .act-send-on:hover { opacity: 0.85; }
+
+  .sidebar { background: var(--bench); border-left: 2px solid var(--border); padding: 20px 16px; overflow-y: auto; }
+  .player-list-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .player-list-item .name { font-weight: 600; font-size: 0.88rem; }
+  .player-list-item .ptime { font-size: 0.75rem; color: var(--text-dim); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .status-dot.on { background: var(--green); }
+  .status-dot.rest { background: var(--accent); }
+  .status-dot.off { background: var(--border); }
+
+  .insight-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.82rem; }
+  .insight-card .ic-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 3px; }
+  .insight-card .ic-value { font-weight: 600; color: var(--text); }
+  .insight-card .ic-sub { font-size: 0.73rem; color: var(--text-dim); margin-top: 2px; }
+  .fairness-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
+  .suggestion-box { background: rgba(240,192,64,0.08); border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+  .suggestion-box strong { color: var(--accent); }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bench); border: 2px solid var(--border); border-radius: 14px; padding: 28px; width: min(460px, 96vw); max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; }
+  .modal-subtitle { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 18px; line-height: 1.5; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+  .form-group input { width: 100%; background: #080c1e; border: 1.5px solid var(--border); border-radius: 7px; color: var(--text); padding: 9px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.15s; }
+  .form-group input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+  .roster-edit-list { margin-bottom: 16px; }
+  .roster-row { display: grid; grid-template-columns: 44px 1fr auto auto; gap: 7px; align-items: center; margin-bottom: 8px; }
+  .roster-row input { background: #080c1e; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; width: 100%; }
+  .roster-row input:focus { border-color: var(--accent); }
+  .remove-player { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.1rem; padding: 4px; opacity: 0.7; transition: opacity 0.15s; line-height:1; }
+  .remove-player:hover { opacity: 1; }
+  .add-player-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .add-player-row input { background: #080c1e; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; }
+  .add-player-row input:focus { border-color: var(--accent); }
+  .add-player-row .name-in { flex: 1; }
+  .add-player-row .num-in { width: 58px; }
+
+  .avail-toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+  .avail-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .avail-slider { position: absolute; inset: 0; background: #1e2a50; border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+  .avail-slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+  .avail-toggle input:checked + .avail-slider { background: var(--green); }
+  .avail-toggle input:checked + .avail-slider::before { transform: translateX(16px); }
+
+  .sub-picker-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .sub-pick-item { background: #080c1e; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.15s; }
+  .sub-pick-item:hover { border-color: var(--accent); background: #0f1535; }
+  .sub-pick-item .spi-name { font-weight: 600; font-size: 0.9rem; }
+  .sub-pick-item .spi-time { font-size: 0.75rem; color: var(--text-dim); }
+
+  #lineupScreen { display: none; position: fixed; inset: 0; z-index: 400; background: #080c1e; overflow-y: auto; }
+  #lineupScreen.show { display: block; }
+  .lineup-header { background: var(--bench); border-bottom: 3px solid var(--accent); padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .lineup-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); letter-spacing: 3px; }
+  .lineup-body { padding: 24px 28px; max-width: 700px; margin: 0 auto; }
+  .lineup-info { background: var(--bench); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; }
+  .lineup-info strong { color: var(--accent); }
+  .lineup-counter { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 16px; }
+  .lineup-counter .cnt { color: var(--accent); font-size: 1.6rem; }
+  .lineup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 10px; margin-bottom: 28px; }
+
+  .lineup-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: border-color 0.15s, background 0.15s; user-select: none; }
+  .lineup-card:hover:not(.unavail) { border-color: var(--text-dim); }
+  .lineup-card.selected { border-color: var(--green); background: #0f2030; }
+  .lineup-card.unavail { opacity: 0.4; cursor: not-allowed; }
+  .lc-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; background: transparent; position: relative; transition: all 0.15s; }
+  .lineup-card.selected .lc-check { background: var(--green); border-color: var(--green); }
+  .lc-check::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: #111; opacity: 0; transition: opacity 0.15s; }
+  .lineup-card.selected .lc-check::after { opacity: 1; }
+  .lc-name { font-weight: 600; font-size: 0.92rem; }
+  .lc-num { font-size: 0.75rem; color: var(--text-dim); margin-top: 1px; }
+  .lineup-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .lineup-select-all { background: none; border: 1px dashed var(--border); color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .lineup-select-all:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .half-time-banner { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.88); align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
+  .half-time-banner.show { display: flex; }
+  .ht-title { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: var(--accent); letter-spacing: 8px; animation: pulse 1s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bench); border: 1.5px solid var(--accent); border-radius: 10px; padding: 12px 20px; font-size: 0.88rem; color: var(--text); z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .fairness-bar { margin-bottom: 14px; }
+  .fairness-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; }
+  .fairness-track { background: #080c1e; border-radius: 4px; height: 6px; overflow: hidden; }
+  .fairness-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+  .empty-state { color: var(--text-dim); font-size: 0.85rem; padding: 10px 0; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ Coach Board</h1>
+  <div class="header-right">
+    <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
+    <button class="btn btn-ghost" onclick="openRoster()">👥 Roster</button>
+    <button class="btn btn-ghost" onclick="openLineup()">📋 Lineup</button>
+    <button class="btn btn-accent" onclick="resetGame()">↺ New Game</button>
+  </div>
+</header>
+
+<div class="timer-bar">
+  <div>
+    <div class="timer-label">Game Time</div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+  </div>
+  <div>
+    <div class="timer-label">Period</div>
+    <div class="period-badge">Half <span id="halfDisplay">1</span></div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="periodProgress" style="width:0%"></div>
+  </div>
+  <div class="timer-controls">
+    <button class="btn btn-green" id="startStopBtn" onclick="toggleTimer()">▶ Start</button>
+    <button class="btn btn-ghost" onclick="endHalf()">Half Time →</button>
+  </div>
+</div>
+
+<div class="alert-bar" id="alertBar">
+  <div class="alert-bar-inner" id="alertBarInner"></div>
+</div>
+
+<div class="main">
+  <div class="pitch-section">
+    <div class="section-title">On Pitch <span class="count-badge" id="onCount">0</span></div>
+    <div class="players-grid" id="onPitchGrid"></div>
+    <div class="section-title" style="margin-top:24px">Resting <span class="count-badge" id="restCount">0</span></div>
+    <div class="players-grid" id="restingGrid"></div>
+    <div class="section-title" style="margin-top:24px">Bench <span class="count-badge" id="benchCount">0</span></div>
+    <div class="players-grid" id="benchGrid"></div>
+  </div>
+  <div class="sidebar">
+    <div class="section-title" style="margin-bottom:12px">Insights</div>
+    <div id="insightsList"></div>
+    <div class="section-title" style="margin-top:16px;margin-bottom:12px">Fairness</div>
+    <div id="fairnessList"></div>
+    <div class="section-title" style="margin-top:16px;margin-bottom:12px">All Players</div>
+    <div id="allPlayersList"></div>
+  </div>
+</div>
+
+<div id="lineupScreen">
+  <div class="lineup-header">
+    <h2>📋 Starting Lineup</h2>
+    <button class="btn btn-ghost" onclick="closeLineup()">✕ Close</button>
+  </div>
+  <div class="lineup-body">
+    <div class="lineup-info">
+      Tap players to select who starts on the pitch. You can pick up to <strong id="lineupMax">7</strong>.
+      Unavailable players (marked in the Roster) are greyed out and cannot be selected.
+    </div>
+    <div class="lineup-counter">Starting: <span class="cnt" id="lineupCount">0</span> / <span id="lineupMaxLabel">7</span></div>
+    <div class="lineup-grid" id="lineupGrid"></div>
+    <div class="lineup-actions">
+      <button class="btn btn-accent" onclick="confirmLineup()">✔ Confirm & Apply</button>
+      <button class="lineup-select-all" onclick="autoFillLineup()">⚡ Auto-fill</button>
+      <button class="btn btn-ghost" onclick="closeLineup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="half-time-banner" id="halfTimeBanner">
+  <div class="ht-title">HALF TIME</div>
+  <p style="color:var(--text-dim);font-size:1rem;">Check fairness, make changes, then kick off.</p>
+  <button class="btn btn-accent" style="font-size:1rem;padding:12px 28px;" onclick="startSecondHalf()">▶ Start 2nd Half</button>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2>Game Settings</h2>
+    <div class="form-group">
+      <label>Half Duration (minutes)</label>
+      <input type="number" id="halfDurationInput" value="20" min="1" max="60">
+    </div>
+    <div class="form-group">
+      <label>Max Players on Pitch</label>
+      <input type="number" id="maxOnPitchInput" value="7" min="1" max="11">
+    </div>
+    <div class="form-group">
+      <label>Rest Time Target (minutes)</label>
+      <input type="number" id="restTimeInput" value="5" min="1" max="20">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="saveSettings()">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal('settingsModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="rosterModal">
+  <div class="modal">
+    <h2>Manage Roster</h2>
+    <p class="modal-subtitle">Toggle the green switch to mark a player as available for today's game. Unavailable players are excluded from the lineup and substitutions.</p>
+    <div class="add-player-row">
+      <input type="text" class="name-in" id="newPlayerNameInput" placeholder="Player name..." onkeydown="if(event.key==='Enter')addPlayer()">
+      <input type="number" class="num-in" id="newPlayerNumInput" placeholder="#" min="1" max="99">
+      <button class="btn btn-accent" onclick="addPlayer()">+ Add</button>
+    </div>
+    <div class="roster-edit-list" id="rosterEditList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="saveRoster()">Save Roster</button>
+      <button class="btn btn-ghost" onclick="closeModal('rosterModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="subModal">
+  <div class="modal">
+    <h2>Substitution</h2>
+    <p class="modal-subtitle">Replacing: <span id="subOutName" style="color:var(--text);font-weight:600"></span></p>
+    <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px">Select player coming on — sorted by least game time:</p>
+    <div class="sub-picker-list" id="subPickerList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('subModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let settings = { halfDuration: 20, maxOnPitch: 7, restTarget: 5 };
+let players = [
+  {id:1,name:'Alice',number:1,available:true},
+  {id:2,name:'Ben',number:2,available:true},
+  {id:3,name:'Cara',number:3,available:true},
+  {id:4,name:'Dan',number:4,available:true},
+  {id:5,name:'Eva',number:5,available:true},
+  {id:6,name:'Finn',number:6,available:true},
+  {id:7,name:'Grace',number:7,available:true},
+  {id:8,name:'Hugo',number:8,available:true},
+  {id:9,name:'Iris',number:9,available:true},
+  {id:10,name:'Jake',number:10,available:true},
+  {id:11,name:'Kira',number:11,available:true},
+];
+let playerState = {};
+let nextId = 12;
+let timerRunning = false;
+let gameSeconds = 0;
+let half = 1;
+let tickInterval = null;
+let subTargetId = null;
+let pendingRosterEdits = [];
+let lineupSelection = new Set();
+
+function initPlayerState() {
+  players.forEach(p => {
+    if (!playerState[p.id]) {
+      playerState[p.id] = { status:'off', gameSeconds:0, restSeconds:0, subsCount:0 };
+    }
+  });
+}
+
+function toggleTimer() {
+  timerRunning = !timerRunning;
+  const btn = document.getElementById('startStopBtn');
+  btn.textContent = timerRunning ? '⏸ Pause' : '▶ Start';
+  btn.className   = timerRunning ? 'btn btn-red' : 'btn btn-green';
+  if (timerRunning) tickInterval = setInterval(tick, 1000);
+  else clearInterval(tickInterval);
+}
+
+function tick() {
+  gameSeconds++;
+  players.forEach(p => {
+    const s = playerState[p.id];
+    if (s.status === 'on')      s.gameSeconds++;
+    if (s.status === 'resting') s.restSeconds++;
+  });
+  renderTimer();
+  renderAll();
+}
+
+function renderTimer() {
+  const m = String(Math.floor(gameSeconds/60)).padStart(2,'0');
+  const s = String(gameSeconds%60).padStart(2,'0');
+  document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  document.getElementById('halfDisplay').textContent  = half;
+  document.getElementById('periodProgress').style.width =
+    Math.min(100, (gameSeconds / (settings.halfDuration * 60)) * 100) + '%';
+}
+
+function endHalf() {
+  if (half === 1) {
+    if (timerRunning) toggleTimer();
+    document.getElementById('halfTimeBanner').classList.add('show');
+  } else { endGame(); }
+}
+
+function startSecondHalf() {
+  document.getElementById('halfTimeBanner').classList.remove('show');
+  half = 2; gameSeconds = 0;
+  renderTimer(); renderAll();
+  showToast('2nd Half started!');
+}
+
+function endGame() {
+  if (timerRunning) toggleTimer();
+  showToast('Game over! Well done coach! 🏆');
+}
+
+function getOverdueThreshold() {
+  return (settings.halfDuration * 60) / 2;
+}
+
+function isOverdue(p) {
+  const s = playerState[p.id];
+  if (s.status !== 'on') return false;
+  return s.gameSeconds > getOverdueThreshold();
+}
+
+function isRestedEnough(p) {
+  const s = playerState[p.id];
+  if (s.status !== 'resting') return false;
+  return s.restSeconds >= settings.restTarget * 60;
+}
+
+function renderAlerts() {
+  const chips = [];
+  const onCount = players.filter(p => playerState[p.id].status === 'on').length;
+  if (onCount < settings.maxOnPitch) {
+    chips.push({ type: 'warn', text: `⚠️ Pitch not full (${onCount}/${settings.maxOnPitch})` });
+  }
+  players.filter(p => isOverdue(p)).forEach(p => {
+    chips.push({ type: 'urgent', text: `⏰ ${p.name} due a rest` });
+  });
+  players.filter(p => isRestedEnough(p)).forEach(p => {
+    chips.push({ type: 'ready', text: `✅ ${p.name} ready to come on` });
+  });
+  const bar   = document.getElementById('alertBar');
+  const inner = document.getElementById('alertBarInner');
+  inner.innerHTML = '';
+  if (chips.length === 0) { bar.classList.remove('has-alerts'); return; }
+  bar.classList.add('has-alerts');
+  chips.forEach(c => {
+    const chip = document.createElement('div');
+    chip.className = `alert-chip ${c.type}`;
+    chip.textContent = c.text;
+    inner.appendChild(chip);
+  });
+}
+
+function renderInsights() {
+  const il = document.getElementById('insightsList');
+  il.innerHTML = '';
+  const active = players.filter(p => p.available !== false);
+  if (active.length === 0) { il.innerHTML = '<div class="empty-state">No players.</div>'; return; }
+  const onPitch = active.filter(p => playerState[p.id].status === 'on');
+  const resting = active.filter(p => playerState[p.id].status === 'resting');
+
+  if (onPitch.length > 0) {
+    const longest = onPitch.reduce((a, b) =>
+      playerState[a.id].gameSeconds >= playerState[b.id].gameSeconds ? a : b);
+    const overdue = isOverdue(longest);
+    il.innerHTML += `
+      <div class="insight-card">
+        <div class="ic-label">⏱ Longest on pitch</div>
+        <div class="ic-value">${longest.name} <span style="color:${overdue ? 'var(--red)' : 'var(--text-dim)'}">
+          ${overdue ? '🔴' : ''} ${fmtTime(playerState[longest.id].gameSeconds)}</span></div>
+        ${overdue ? '<div class="ic-sub" style="color:var(--red)">Consider subbing off</div>' : ''}
+      </div>`;
+  }
+
+  if (resting.length > 0) {
+    const longestRest = resting.reduce((a, b) =>
+      playerState[a.id].restSeconds >= playerState[b.id].restSeconds ? a : b);
+    const ready = isRestedEnough(longestRest);
+    il.innerHTML += `
+      <div class="insight-card">
+        <div class="ic-label">💤 Resting longest</div>
+        <div class="ic-value">${longestRest.name} — ${fmtTime(playerState[longestRest.id].restSeconds)}
+          ${ready ? '<span style="color:var(--green);font-size:0.72rem;margin-left:5px">✅ Ready!</span>' : ''}
+        </div>
+      </div>`;
+  }
+
+  const times = active.map(p => playerState[p.id].gameSeconds);
+  const maxT  = Math.max(...times);
+  const minT  = Math.min(...times);
+  const score = maxT === 0 ? 100 : Math.round((minT / maxT) * 100);
+  const scoreCol = score > 75 ? 'var(--green)' : score > 50 ? 'var(--accent)' : 'var(--red)';
+  il.innerHTML += `
+    <div class="insight-card">
+      <div class="ic-label">⚖️ Fairness Score</div>
+      <div class="fairness-score" style="color:${scoreCol}">${score}%</div>
+      <div class="ic-sub">${score > 75 ? 'Well balanced!' : score > 50 ? 'Some imbalance' : 'Very uneven — rotate soon'}</div>
+    </div>`;
+
+  if (onPitch.length > 0) {
+    const bench = active.filter(p =>
+      playerState[p.id].status === 'resting' || playerState[p.id].status === 'off');
+    const subOff = onPitch.reduce((a, b) =>
+      playerState[a.id].gameSeconds >= playerState[b.id].gameSeconds ? a : b);
+    if (bench.length > 0) {
+      const sorted = [...bench].sort((a, b) => {
+        const sa = playerState[a.id], sb = playerState[b.id];
+        if (sa.status !== sb.status) return sa.status === 'resting' ? -1 : 1;
+        return sa.gameSeconds - sb.gameSeconds;
+      });
+      const subOn = sorted[0];
+      il.innerHTML += `
+        <div class="suggestion-box">
+          💡 <strong>Suggested sub:</strong><br>
+          Off → ${subOff.name} (#${subOff.number})<br>
+          On &nbsp;→ ${subOn.name} (#${subOn.number})
+        </div>`;
+    }
+  }
+}
+
+function openLineup() {
+  lineupSelection = new Set(
+    players.filter(p => playerState[p.id]?.status === 'on').map(p => p.id)
+  );
+  renderLineupGrid();
+  document.getElementById('lineupScreen').classList.add('show');
+}
+
+function closeLineup() {
+  document.getElementById('lineupScreen').classList.remove('show');
+}
+
+function renderLineupGrid() {
+  const max = settings.maxOnPitch;
+  document.getElementById('lineupMax').textContent      = max;
+  document.getElementById('lineupMaxLabel').textContent = max;
+  document.getElementById('lineupCount').textContent    = lineupSelection.size;
+  const grid = document.getElementById('lineupGrid');
+  grid.innerHTML = '';
+  players.forEach(p => {
+    const avail = p.available !== false;
+    const sel   = lineupSelection.has(p.id);
+    const card  = document.createElement('div');
+    card.className = 'lineup-card' + (sel ? ' selected' : '') + (!avail ? ' unavail' : '');
+    card.innerHTML = `
+      <div class="lc-check"></div>
+      <div>
+        <div class="lc-name">${p.name}</div>
+        <div class="lc-num">#${p.number}${!avail ? ' · Unavailable' : ''}</div>
+      </div>`;
+    if (avail) card.onclick = () => toggleLineupPlayer(p.id);
+    grid.appendChild(card);
+  });
+}
+
+function toggleLineupPlayer(id) {
+  if (lineupSelection.has(id)) {
+    lineupSelection.delete(id);
+  } else {
+    if (lineupSelection.size >= settings.maxOnPitch) {
+      showToast(`Max ${settings.maxOnPitch} starters. Deselect someone first.`);
+      return;
+    }
+    lineupSelection.add(id);
+  }
+  renderLineupGrid();
+}
+
+function autoFillLineup() {
+  const max = settings.maxOnPitch;
+  const available = players.filter(p => p.available !== false);
+  lineupSelection = new Set(available.slice(0, max).map(p => p.id));
+  renderLineupGrid();
+}
+
+function confirmLineup() {
+  if (lineupSelection.size === 0) { showToast('Pick at least 1 player to start.'); return; }
+  players.forEach(p => {
+    const s = playerState[p.id];
+    if (lineupSelection.has(p.id)) {
+      s.status = 'on';
+    } else {
+      if (s.status === 'on') s.status = 'off';
+      s.restSeconds = 0;
+    }
+  });
+  closeLineup();
+  renderAll();
+  showToast(`✅ Lineup set — ${lineupSelection.size} on pitch.`);
+}
+
+function openSubModal(playerId) {
+  subTargetId = playerId;
+  const p = players.find(x => x.id === playerId);
+  document.getElementById('subOutName').textContent = \
+    `${p.name} (#${p.number})`;
+  const available = players.filter(pl => {
+    const s = playerState[pl.id];
+    return pl.id !== playerId && pl.available !== false &&
+           (s.status === 'resting' || s.status === 'off');
+  }).sort((a, b) => {
+    const sa = playerState[a.id], sb = playerState[b.id];
+    if (sa.status !== sb.status) return sa.status === 'resting' ? -1 : 1;
+    return sa.gameSeconds - sb.gameSeconds;
+  });
+  const list = document.getElementById('subPickerList');
+  list.innerHTML = '';
+  if (available.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-dim);font-size:0.85rem;">No available players on bench.</p>';
+  }
+  available.forEach(pl => {
+    const s   = playerState[pl.id];
+    const tag = s.status === 'resting' ? '🟡 Resting' : '⚪ Bench';
+    const div = document.createElement('div');
+    div.className = 'sub-pick-item';
+    div.innerHTML = `<span class="spi-name">#${pl.number} ${pl.name}</span>
+                     <span class="spi-time">${tag} · ${fmtTime(s.gameSeconds)} played</span>`;
+    div.onclick = () => doSub(pl.id);
+    list.appendChild(div);
+  });
+  document.getElementById('subModal').classList.add('open');
+}
+
+function doSub(inId) {
+  const sOut = playerState[subTargetId];
+  const sIn  = playerState[inId];
+  sOut.status = 'resting'; sOut.subsCount++;
+  sIn.status  = 'on';      sIn.restSeconds = 0; sIn.subsCount++;
+  const pOut = players.find(x => x.id === subTargetId);
+  const pIn  = players.find(x => x.id === inId);
+  showToast(`↕ ${pIn.name} on for ${pOut.name}`);
+  closeModal('subModal');
+  renderAll();
+}
+
+function sendOff(id) { playerState[id].status = 'off'; renderAll(); }
+
+function sendOn(id) {
+  const onCount = players.filter(p => playerState[p.id].status === 'on').length;
+  if (onCount >= settings.maxOnPitch) { showToast(`Pitch full! Max ${settings.maxOnPitch}.`); return; }
+  playerState[id].status = 'on';
+  playerState[id].restSeconds = 0;
+  renderAll();
+}
+
+function renderAll() { renderPitch(); renderSidebar(); renderAlerts(); }
+
+function fmtTime(secs) {
+  return \
+    \
+      `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+}
+
+function renderPitch() {
+  const onPitch = players.filter(p => playerState[p.id].status === 'on');
+  const resting = players.filter(p => playerState[p.id].status === 'resting');
+  const bench   = players.filter(p => p.available !== false && playerState[p.id].status === 'off');
+  document.getElementById('onCount').textContent    = onPitch.length;
+  document.getElementById('restCount').textContent  = resting.length;
+  document.getElementById('benchCount').textContent = bench.length;
+  const ts = settings.halfDuration * 60;
+  const grids = [
+    ['onPitchGrid', onPitch, 'on'],
+    ['restingGrid', resting, 'resting'],
+    ['benchGrid',   bench,   'off'],
+  ];
+  grids.forEach(([id, list, status]) => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    if (list.length === 0) { el.innerHTML = '<div class="empty-state">None</div>'; return; }
+    list.forEach(p => el.appendChild(buildCard(p, status, ts)));
+  });
+}
+
+function buildCard(p, status, totalSecs) {
+  const s    = playerState[p.id];
+  const card = document.createElement('div');
+  const pct  = Math.min(100, (s.gameSeconds / Math.max(1, totalSecs)) * 100);
+  const barC = pct < 40 ? 'warn' : pct < 95 ? 'good' : 'over';
+  const overdue     = status === 'on'      && isOverdue(p);
+  const restedReady = status === 'resting' && isRestedEnough(p);
+  let cardClass = 'player-card';
+  if (status === 'on')      cardClass += overdue ? ' on-pitch overdue' : ' on-pitch';
+  if (status === 'resting') cardClass += restedReady ? ' rested-ready' : ' resting';
+  let flagHTML = '';
+  if (overdue)     flagHTML = '<div class="card-flag overdue-flag">⏰ Due a rest</div>';
+  if (restedReady) flagHTML = '<div class="card-flag ready-flag">✅ Ready to come on</div>';
+  let actionsHTML;
+  if (status === 'on') {
+    actionsHTML = `<button class="act-sub" onclick="openSubModal(${p.id})">↕ Sub</button>
+                   <button class="act-bench" onclick="sendOff(${p.id})">Bench</button>`;
+  } else {
+    actionsHTML = `<button class="act-send-on" onclick="sendOn(${p.id})">▶ Send On</button>`;
+  }
+  card.className = cardClass;
+  card.innerHTML = `
+    <div class="player-name-row">
+      <span class="player-name">${p.name}</span>
+      <span class="player-number">${p.number}</span>
+    </div>
+    ${flagHTML}
+    <div class="stat-row">
+      <div class="stat-pill">⏱ <span>${fmtTime(s.gameSeconds)}</span></div>
+      ${status === 'resting'
+        ? `<div class="stat-pill yellow">Rest <span>${fmtTime(s.restSeconds)}</span></div>`
+        : `<div class="stat-pill">Subs <span>${s.subsCount}</span></div>`}
+    </div>
+    <div class="time-bar-wrap"><div class="time-bar-fill ${barC}" style="width:${pct}%"></div></div>
+    <div class="card-actions">${actionsHTML}</div>`;
+  return card;
+}
+
+function renderSidebar() {
+  renderInsights();
+  const active = players.filter(p => p.available !== false);
+  const maxSec = Math.max(1, ...active.map(p => playerState[p.id].gameSeconds));
+  const fl = document.getElementById('fairnessList');
+  fl.innerHTML = '';
+  [...active].sort((a,b) => playerState[b.id].gameSeconds - playerState[a.id].gameSeconds)
+    .forEach(p => {
+      const s   = playerState[p.id];
+      const pct = Math.min(100, (s.gameSeconds / maxSec) * 100);
+      const col = pct > 80 ? 'var(--green)' : pct > 40 ? 'var(--accent)' : 'var(--red)';
+      fl.innerHTML += `
+        <div class="fairness-bar">
+          <div class="fairness-label"><span>#${p.number} ${p.name}</span><span>${fmtTime(s.gameSeconds)}</span></div>
+          <div class="fairness-track"><div class="fairness-fill" style="width:${pct}%;background:${col}"></div></div>
+        </div>`;
+    });
+  const al = document.getElementById('allPlayersList');
+  al.innerHTML = '';
+  players.forEach(p => {
+    const s = playerState[p.id];
+    const dotC = s.status === 'on' ? 'on' : s.status === 'resting' ? 'rest' : 'off';
+    const unavTag = p.available === false
+      ? '<span style="font-size:0.7rem;color:var(--red);margin-left:5px">✗ out</span>' : '';
+    al.innerHTML += `
+      <div class="player-list-item">
+        <div>
+          <div class="name">#${p.number} ${p.name}${unavTag}</div>
+          <div class="ptime">${fmtTime(s.gameSeconds)} played · ${s.subsCount} subs</div>
+        </div>
+        <div class="status-dot ${dotC}"></div>
+      </div>`;
+  });
+}
+
+function openSettings() {
+  document.getElementById('halfDurationInput').value = settings.halfDuration;
+  document.getElementById('maxOnPitchInput').value   = settings.maxOnPitch;
+  document.getElementById('restTimeInput').value     = settings.restTarget;
+  document.getElementById('settingsModal').classList.add('open');
+}
+function saveSettings() {
+  settings.halfDuration = parseInt(document.getElementById('halfDurationInput').value) || 20;
+  settings.maxOnPitch   = parseInt(document.getElementById('maxOnPitchInput').value)   || 7;
+  settings.restTarget   = parseInt(document.getElementById('restTimeInput').value)     || 5;
+  closeModal('settingsModal');
+  renderAll();
+  showToast('Settings saved!');
+}
+
+function openRoster() {
+  pendingRosterEdits = players.map(p => ({...p}));
+  renderRosterEditList();
+  document.getElementById('rosterModal').classList.add('open');
+}
+
+function renderRosterEditList() {
+  const list = document.getElementById('rosterEditList');
+  list.innerHTML = '';
+  pendingRosterEdits.forEach((p, i) => {
+    const avail = p.available !== false;
+    const row   = document.createElement('div');
+    row.className = 'roster-row';
+    row.innerHTML = `
+      <input type="number" value="${p.number}" min="1" max="99" placeholder="#"
+        onchange="pendingRosterEdits[${i}].number=parseInt(this.value)||${p.number}">
+      <input type="text" value="${p.name}" placeholder="Name"
+        onchange="pendingRosterEdits[${i}].name=this.value.trim()||pendingRosterEdits[${i}].name">
+      <label class="avail-toggle" title="${avail ? 'Available' : 'Unavailable — tap to toggle'}">
+        <input type="checkbox" ${avail ? 'checked' : ''}
+          onchange="pendingRosterEdits[${i}].available=this.checked">
+        <span class="avail-slider"></span>
+      </label>
+      <button class="remove-player" onclick="removePendingPlayer(${i})">✕</button>`;
+    list.appendChild(row);
+  });
+}
+
+function removePendingPlayer(i) { pendingRosterEdits.splice(i, 1); renderRosterEditList(); }
+
+function addPlayer() {
+  const name = document.getElementById('newPlayerNameInput').value.trim();
+  const num  = parseInt(document.getElementById('newPlayerNumInput').value) || nextId;
+  if (!name) { showToast('Enter a player name.'); return; }
+  pendingRosterEdits.push({ id: nextId++, name, number: num, available: true });
+  document.getElementById('newPlayerNameInput').value = '';
+  document.getElementById('newPlayerNumInput').value  = '';
+  renderRosterEditList();
+}
+
+function saveRoster() {
+  const newIds = new Set(pendingRosterEdits.map(p => p.id));
+  players.forEach(p => { if (!newIds.has(p.id)) delete playerState[p.id]; });
+  players = pendingRosterEdits.map(p => ({...p}));
+  players.forEach(p => {
+    if (!playerState[p.id]) {
+      playerState[p.id] = { status:'off', gameSeconds:0, restSeconds:0, subsCount:0 };
+    }
+    if (p.available === false) playerState[p.id].status = 'off';
+  });
+  closeModal('rosterModal');
+  renderAll();
+  showToast('Roster saved!');
+}
+
+function resetGame() {
+  if (!confirm('Start a new game? All times will be reset.')) return;
+  if (timerRunning) toggleTimer();
+  gameSeconds = 0; half = 1;
+  playerState = {};
+  initPlayerState();
+  renderTimer(); renderAll();
+  openLineup();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); })
+);
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+initPlayerState();
+renderTimer();
+renderAll();
+openLineup();
+</script>
+</body>
+</html>
