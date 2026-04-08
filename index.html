@@ -10,7 +10,7 @@
     --pitch-dark: #0d1b3e; --accent: #5b9bd5; --accent-dark: #3a7bbf;
     --bench: #0a1628; --bench-light: #132040;
     --text: #dce8f5; --text-dim: #6e8aaa;
-    --red: #c0392b; --green: #2e6da4;
+    --red: #39ff14; --danger: #c0392b; --green: #2e6da4;
     --card-bg: #0f1e38; --border: #1e3256;
     --highlight: #7ab3e0; --on-color: #4a90d9; --rest-color: #2563a8;
   }
@@ -28,7 +28,7 @@
   .btn-ghost:hover { background: var(--bench-light); color: var(--text); }
   .btn-green { background: var(--on-color); color: #fff; }
   .btn-green:hover { opacity: 0.85; }
-  .btn-red { background: var(--red); color: #fff; }
+  .btn-red { background: var(--red); color: #0a1628; }
   .btn-red:hover { opacity: 0.85; }
 
   .timer-bar { background: var(--pitch-dark); border-bottom: 2px solid #091530; padding: 10px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
@@ -98,11 +98,15 @@
 
   /* ROSTER */
   .roster-edit-list { margin-bottom: 16px; }
-  .roster-row { display: grid; grid-template-columns: 44px 1fr auto auto; gap: 7px; align-items: center; margin-bottom: 8px; }
+  .roster-row { display: grid; grid-template-columns: 44px 1fr auto auto auto; gap: 7px; align-items: center; margin-bottom: 8px; }
   .roster-row input { background: #111822; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; width: 100%; }
   .roster-row input:focus { border-color: var(--accent); }
-  .remove-player { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.1rem; padding: 4px; opacity: 0.7; transition: opacity 0.15s; line-height:1; }
+  .remove-player { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; padding: 4px; opacity: 0.7; transition: opacity 0.15s; line-height:1; }
   .remove-player:hover { opacity: 1; }
+  .gk-btn { background: none; border: 1.5px solid var(--border); color: var(--text-dim); font-size: 0.72rem; font-weight: 700; padding: 3px 7px; border-radius: 5px; cursor: pointer; transition: all 0.15s; white-space: nowrap; letter-spacing: 0.5px; }
+  .gk-btn.active { background: #f0c040; border-color: #f0c040; color: #0a1628; box-shadow: 0 0 6px #f0c04088; }
+  .gk-btn:hover:not(.active) { border-color: #f0c040; color: #f0c040; }
+  .gk-badge { font-size: 0.62rem; font-weight: 700; background: #f0c040; color: #0a1628; border-radius: 4px; padding: 1px 5px; margin-left: 5px; vertical-align: middle; display: inline-block; }
   .add-player-row { display: flex; gap: 8px; margin-bottom: 16px; }
   .add-player-row input { background: #111822; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text); padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; }
   .add-player-row input:focus { border-color: var(--accent); }
@@ -473,6 +477,7 @@
   <div class="modal">
     <h2>Manage Roster</h2>
     <p class="modal-subtitle">Toggle the green switch to mark a player as available for today's game. Unavailable players are excluded from the lineup and substitutions.</p>
+    <p class="modal-subtitle" style="color:#f0c040;margin-top:-10px">🧤 GK is excluded from playing time alerts. Reassign each half if rotating.</p>
     <div class="add-player-row">
       <input type="text" class="name-in" id="newPlayerNameInput" placeholder="Player name..." onkeydown="if(event.key==='Enter')addPlayer()">
       <input type="number" class="num-in" id="newPlayerNumInput" placeholder="#" min="1" max="99">
@@ -522,17 +527,17 @@
 let settings = { halfDuration: 20, maxOnPitch: 7, restTarget: 5 };
 
 let players = [
-  {id:1,name:'Alice',number:1,available:true},
-  {id:2,name:'Ben',number:2,available:true},
-  {id:3,name:'Cara',number:3,available:true},
-  {id:4,name:'Dan',number:4,available:true},
-  {id:5,name:'Eva',number:5,available:true},
-  {id:6,name:'Finn',number:6,available:true},
-  {id:7,name:'Grace',number:7,available:true},
-  {id:8,name:'Hugo',number:8,available:true},
-  {id:9,name:'Iris',number:9,available:true},
-  {id:10,name:'Jake',number:10,available:true},
-  {id:11,name:'Kira',number:11,available:true},
+  {id:1,name:'Alice',number:1,available:true,isGK:false},
+  {id:2,name:'Ben',number:2,available:true,isGK:false},
+  {id:3,name:'Cara',number:3,available:true,isGK:false},
+  {id:4,name:'Dan',number:4,available:true,isGK:false},
+  {id:5,name:'Eva',number:5,available:true,isGK:false},
+  {id:6,name:'Finn',number:6,available:true,isGK:false},
+  {id:7,name:'Grace',number:7,available:true,isGK:false},
+  {id:8,name:'Hugo',number:8,available:true,isGK:false},
+  {id:9,name:'Iris',number:9,available:true,isGK:false},
+  {id:10,name:'Jake',number:10,available:true,isGK:false},
+  {id:11,name:'Kira',number:11,available:true,isGK:false},
 ];
 
 let playerState = {};   // id → { status, gameSeconds, restSeconds, subsCount }
@@ -802,7 +807,7 @@ function buildCard(p, status, totalSecs) {
 
   card.innerHTML = `
     <div class="player-name-row">
-      <span class="player-name">${p.name}</span>
+      <span class="player-name">${p.name}${p.isGK ? '<span class="gk-badge">🧤 GK</span>' : ''}</span>
       <span class="player-number">${p.number}</span>
     </div>
     <div class="stat-row">
@@ -848,12 +853,13 @@ function renderSidebar() {
       const pct  = Math.min(100, (s.gameSeconds / Math.max(1, maxSec)) * 100);
       const ideal = totalHalfSecs * half;
       const behindSecs = Math.max(0, (ideal * 0.6) - s.gameSeconds);
-      const col  = behindSecs > 120 ? '#c0392b' : pct > 70 ? '#4a90d9' : '#2563a8';
+      const col  = p.isGK ? '#f0c040' : behindSecs > 120 ? '#39ff14' : pct > 70 ? '#4a90d9' : '#2563a8';
       const statusIcon = s.status === 'on' ? '●' : s.status === 'resting' ? '◐' : '○';
+      const gkLabel = p.isGK ? ' <span class="gk-badge">🧤 GK</span>' : '';
       fl.innerHTML += `
         <div class="fairness-bar">
           <div class="fairness-label">
-            <span>${statusIcon} #${p.number} ${p.name}</span>
+            <span>${statusIcon} #${p.number} ${p.name}${gkLabel}</span>
             <span>${fmtTime(s.gameSeconds)}</span>
           </div>
           <div class="fairness-track">
@@ -869,7 +875,7 @@ function renderSidebar() {
     const s     = playerState[p.id];
     const dotC  = s.status === 'on' ? 'on' : s.status === 'resting' ? 'rest' : 'off';
     const unavTag = p.available === false
-      ? '<span style="font-size:0.7rem;color:var(--red);margin-left:5px">✗ out</span>' : '';
+      ? '<span style="font-size:0.7rem;color:var(--danger);margin-left:5px">✗ out</span>' : '';
     al.innerHTML += `
       <div class="player-list-item">
         <div>
@@ -885,11 +891,14 @@ function generateInsights(active, halfSecs, totalGameSecs) {
   const insights = [];
   const onPitch  = active.filter(p => playerState[p.id].status === 'on');
   const resting  = active.filter(p => playerState[p.id].status === 'resting');
-  const bench    = active.filter(p => playerState[p.id].status === 'off');
 
-  if (active.length === 0) return insights;
+  // Exclude GK from fairness calculations
+  const nonGK    = active.filter(p => p.isGK !== true);
+  const bench    = nonGK.filter(p => playerState[p.id].status === 'off');
 
-  const times      = active.map(p => playerState[p.id].gameSeconds);
+  if (nonGK.length === 0) return insights;
+
+  const times      = nonGK.map(p => playerState[p.id].gameSeconds);
   const maxT       = Math.max(...times);
   const minT       = Math.min(...times);
   const avgT       = Math.round(times.reduce((a,b)=>a+b,0) / times.length);
@@ -898,15 +907,15 @@ function generateInsights(active, halfSecs, totalGameSecs) {
 
   // 1. Big fairness gap
   if (gapSecs > 300 && elapsedTotal > 120) {
-    const mostP  = active.find(p => playerState[p.id].gameSeconds === maxT);
-    const leastP = active.find(p => playerState[p.id].gameSeconds === minT);
+    const mostP  = nonGK.find(p => playerState[p.id].gameSeconds === maxT);
+    const leastP = nonGK.find(p => playerState[p.id].gameSeconds === minT);
     insights.push({
       type: 'alert', icon: '⚠',
       title: 'Large Playing Time Gap',
       body: `<strong>${mostP.name}</strong> has ${fmtTime(gapSecs)} more game time than <strong>${leastP.name}</strong>. Consider rotating soon.`
     });
   } else if (gapSecs > 120 && elapsedTotal > 120) {
-    const leastP = active.find(p => playerState[p.id].gameSeconds === minT);
+    const leastP = nonGK.find(p => playerState[p.id].gameSeconds === minT);
     insights.push({
       type: 'warn', icon: '↕',
       title: 'Uneven Playing Time',
@@ -914,7 +923,7 @@ function generateInsights(active, halfSecs, totalGameSecs) {
     });
   }
 
-  // 2. Players resting too long
+  // 2. Players resting too long (includes GK — resting alert still applies)
   const restTargetSecs = settings.restTarget * 60;
   resting.forEach(p => {
     const s = playerState[p.id];
@@ -927,7 +936,7 @@ function generateInsights(active, halfSecs, totalGameSecs) {
     }
   });
 
-  // 3. Players on bench with no game time yet
+  // 3. Players on bench with no game time yet (GK excluded)
   const noTimeBench = bench.filter(p => playerState[p.id].gameSeconds === 0);
   if (noTimeBench.length > 0 && elapsedTotal > 180) {
     insights.push({
@@ -937,7 +946,7 @@ function generateInsights(active, halfSecs, totalGameSecs) {
     });
   }
 
-  // 4. Good balance
+  // 4. Good balance (based on non-GK players)
   if (gapSecs <= 60 && elapsedTotal > 120 && insights.length === 0) {
     insights.push({
       type: 'good', icon: '✓',
@@ -947,7 +956,8 @@ function generateInsights(active, halfSecs, totalGameSecs) {
   }
 
   // 5. Half-time sub suggestion (only in 1st half)
-  if (half === 1 && bench.length > 0) {
+  const benchAll = active.filter(p => playerState[p.id].status === 'off');
+  if (half === 1 && benchAll.length > 0) {
     const timeLeft = halfSecs - gameSeconds;
     if (timeLeft > 0 && timeLeft < 300) {
       insights.push({
@@ -1031,6 +1041,7 @@ function renderRosterEditList() {
   list.innerHTML = '';
   pendingRosterEdits.forEach((p, i) => {
     const avail = p.available !== false;
+    const isGK  = p.isGK === true;
     const row   = document.createElement('div');
     row.className = 'roster-row';
     row.innerHTML = `
@@ -1043,6 +1054,7 @@ function renderRosterEditList() {
           onchange="pendingRosterEdits[${i}].available=this.checked">
         <span class="avail-slider"></span>
       </label>
+      <button class="gk-btn${isGK ? ' active' : ''}" onclick="toggleGK(${i})" title="Mark as Goalkeeper">GK</button>
       <button class="remove-player" onclick="removePendingPlayer(${i})">✕</button>
     `;
     list.appendChild(row);
@@ -1054,11 +1066,18 @@ function removePendingPlayer(i) {
   renderRosterEditList();
 }
 
+function toggleGK(i) {
+  const wasGK = pendingRosterEdits[i].isGK === true;
+  pendingRosterEdits.forEach(p => { p.isGK = false; });
+  if (!wasGK) pendingRosterEdits[i].isGK = true;
+  renderRosterEditList();
+}
+
 function addPlayer() {
   const name = document.getElementById('newPlayerNameInput').value.trim();
   const num  = parseInt(document.getElementById('newPlayerNumInput').value) || nextId;
   if (!name) { showToast('Enter a player name.'); return; }
-  pendingRosterEdits.push({ id: nextId++, name, number: num, available: true });
+  pendingRosterEdits.push({ id: nextId++, name, number: num, available: true, isGK: false });
   document.getElementById('newPlayerNameInput').value = '';
   document.getElementById('newPlayerNumInput').value  = '';
   renderRosterEditList();
