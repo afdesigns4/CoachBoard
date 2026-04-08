@@ -1205,7 +1205,7 @@ function saveGameToHistory(opponent, ourScore, theirScore) {
   const today = new Date();
   const dateStr = today.toISOString().slice(0, 10);
   const game = {
-    id: Date.now(),
+    id: Date.now() + Math.floor(Math.random() * 10000),
     date: dateStr,
     opponent,
     ourScore,
@@ -1290,7 +1290,7 @@ function renderHistoryScreen() {
       <tr>
         <td>#${pt.number} ${pt.name}</td>
         <td>${fmtTime(pt.totalSeconds)}</td>
-        <td>${pt.gamesPlayed > 0 ? fmtTime(Math.round(pt.totalSeconds / pt.gamesPlayed)) : '0:00'}</td>
+        <td>${pt.gamesPlayed > 0 ? fmtTime(Math.round(pt.totalSeconds / pt.gamesPlayed)) : fmtTime(0)}</td>
         <td>${pt.gamesPlayed}</td>
       </tr>`).join('');
 
@@ -1299,7 +1299,7 @@ function renderHistoryScreen() {
     const result = game.ourScore > game.theirScore ? 'win'
                  : game.ourScore < game.theirScore ? 'loss' : 'draw';
     const resultLabel = result === 'win' ? 'W' : result === 'loss' ? 'L' : 'D';
-    const duration = (game.halfDuration || 20) * 2;
+    const duration = (game.halfDuration || settings.halfDuration) * 2;
 
     const playerRows = [...game.playerStats]
       .sort((a, b) => b.gameSeconds - a.gameSeconds)
