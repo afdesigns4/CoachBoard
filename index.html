@@ -355,6 +355,32 @@
     .lineup-grid { grid-template-columns: 1fr; }
     .lineup-body { padding: 16px; }
   }
+
+  /* ── HISTORY SCREEN ── */
+  #historyScreen { display: none; position: fixed; inset: 0; z-index: 400; background: #111822; overflow-y: auto; }
+  #historyScreen.show { display: block; }
+  .history-body { padding: 24px 28px; max-width: 800px; margin: 0 auto; }
+  .history-season-summary { background: var(--bench); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+  .history-season-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 14px; }
+  .history-record { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 8px; }
+  .record-item { text-align: center; min-width: 60px; }
+  .record-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--text); }
+  .record-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
+  .history-games-list { margin-bottom: 8px; }
+  .history-game-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .history-game-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+  .history-game-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
+  .history-game-meta { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+  .history-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--text); letter-spacing: 2px; }
+  .result-badge { font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+  .result-badge.result-win { background: var(--on-color); color: #fff; }
+  .result-badge.result-loss { background: var(--danger); color: #fff; }
+  .result-badge.result-draw { background: var(--rest-color); color: #fff; }
+  .player-stats-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .player-stats-table th { text-align: left; padding: 6px 10px; color: var(--text-dim); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
+  .player-stats-table td { padding: 6px 10px; color: var(--text); }
+  .player-stats-table tr.row-even td { background: rgba(255,255,255,0.03); }
+  @media (max-width: 760px) { .history-body { padding: 16px; } .history-record { gap: 12px; } }
 </style>
 </head>
 <body>
@@ -365,6 +391,7 @@
     <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
     <button class="btn btn-ghost" onclick="openRoster()">👥 Roster</button>
     <button class="btn btn-ghost" onclick="openLineup()">📋 Lineup</button>
+    <button class="btn btn-ghost" onclick="openHistory()">📅 History</button>
     <button class="btn btn-accent" onclick="resetGame()">↺ New Game</button>
   </div>
   <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false" aria-controls="mobileDropdown">☰</button>
@@ -372,6 +399,7 @@
     <button class="btn btn-ghost" onclick="closeMobileMenu();openSettings()">⚙ Settings</button>
     <button class="btn btn-ghost" onclick="closeMobileMenu();openRoster()">👥 Roster</button>
     <button class="btn btn-ghost" onclick="closeMobileMenu();openLineup()">📋 Lineup</button>
+    <button class="btn btn-ghost" onclick="closeMobileMenu();openHistory()">📅 History</button>
     <button class="btn btn-accent" onclick="closeMobileMenu();resetGame()">↺ New Game</button>
   </div>
 </header>
@@ -439,6 +467,41 @@
       <button class="btn btn-accent" onclick="confirmLineup()">✔ Confirm & Apply</button>
       <button class="lineup-select-all" onclick="autoFillLineup()">⚡ Auto-fill</button>
       <button class="btn btn-ghost" onclick="closeLineup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── HISTORY SCREEN ── -->
+<div id="historyScreen">
+  <div class="lineup-header">
+    <h2>📅 Game History</h2>
+    <button class="btn btn-ghost" onclick="closeHistory()">✕ Close</button>
+  </div>
+  <div class="history-body" id="historyBody"></div>
+</div>
+
+<!-- END GAME MODAL -->
+<div class="modal-overlay" id="endGameModal">
+  <div class="modal">
+    <h2>End Game</h2>
+    <p class="modal-subtitle">Save this game to history before starting a new one.</p>
+    <div class="form-group">
+      <label>Opponent Name</label>
+      <input type="text" id="opponentInput" placeholder="e.g. Red Eagles">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="form-group" style="margin-bottom:0">
+        <label>Our Score</label>
+        <input type="number" id="ourScoreInput" value="0" min="0">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Their Score</label>
+        <input type="number" id="theirScoreInput" value="0" min="0">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="saveAndNewGame()">💾 Save &amp; New Game</button>
+      <button class="btn btn-ghost" onclick="skipAndNewGame()">Skip &amp; New Game</button>
     </div>
   </div>
 </div>
@@ -550,6 +613,7 @@ let tickInterval = null;
 let subTargetId = null;
 let pendingRosterEdits = [];
 let lineupSelection = new Set();
+let gameHistory = [];
 
 // ── INIT ──────────────────────────────────────────────────────
 function initPlayerState() {
@@ -608,7 +672,7 @@ function startSecondHalf() {
 
 function endGame() {
   if (timerRunning) toggleTimer();
-  showToast('Game over! Well done coach! 🏆');
+  openEndGameModal();
 }
 
 // ── LINEUP PICKER ─────────────────────────────────────────────
@@ -1106,7 +1170,64 @@ function saveRoster() {
 
 // ── RESET ─────────────────────────────────────────────────────
 function resetGame() {
-  if (!confirm('Start a new game? All times will be reset.')) return;
+  if (gameSeconds > 0) {
+    if (timerRunning) toggleTimer();
+    openEndGameModal();
+  } else {
+    if (!confirm('Start a new game? All times will be reset.')) return;
+    doResetGame();
+  }
+}
+
+function openEndGameModal() {
+  document.getElementById('opponentInput').value = '';
+  document.getElementById('ourScoreInput').value = '0';
+  document.getElementById('theirScoreInput').value = '0';
+  document.getElementById('endGameModal').classList.add('open');
+}
+
+function saveAndNewGame() {
+  const opponent  = document.getElementById('opponentInput').value.trim() || 'Unknown';
+  const ourScore  = parseInt(document.getElementById('ourScoreInput').value)  || 0;
+  const theirScore = parseInt(document.getElementById('theirScoreInput').value) || 0;
+  saveGameToHistory(opponent, ourScore, theirScore);
+  closeModal('endGameModal');
+  doResetGame();
+  showToast('Game saved to history! 📅');
+}
+
+function skipAndNewGame() {
+  closeModal('endGameModal');
+  doResetGame();
+}
+
+function saveGameToHistory(opponent, ourScore, theirScore) {
+  const today = new Date();
+  const dateStr = today.toISOString().slice(0, 10);
+  const game = {
+    id: Date.now(),
+    date: dateStr,
+    opponent,
+    ourScore,
+    theirScore,
+    halfDuration: settings.halfDuration,
+    playerStats: players.map(p => {
+      const s = playerState[p.id] || {};
+      return {
+        id: p.id,
+        name: p.name,
+        number: p.number,
+        gameSeconds: s.gameSeconds || 0,
+        subsCount: s.subsCount || 0,
+        isGK: p.isGK || false
+      };
+    })
+  };
+  gameHistory.push(game);
+  localStorage.setItem('coachboard_history', JSON.stringify(gameHistory));
+}
+
+function doResetGame() {
   if (timerRunning) toggleTimer();
   gameSeconds = 0; half = 1;
   playerState = {};
@@ -1115,7 +1236,133 @@ function resetGame() {
   initPlayerState();
   saveState();
   renderTimer(); renderAll();
+  closeHistory();
   openLineup();
+}
+
+// ── HISTORY SCREEN ────────────────────────────────────────────
+function openHistory() {
+  renderHistoryScreen();
+  document.getElementById('historyScreen').classList.add('show');
+}
+
+function closeHistory() {
+  document.getElementById('historyScreen').classList.remove('show');
+}
+
+function renderHistoryScreen() {
+  const body = document.getElementById('historyBody');
+
+  if (gameHistory.length === 0) {
+    body.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:var(--text-dim)">
+        <div style="font-size:3rem;margin-bottom:12px">📅</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px">No Games Yet</div>
+        <div style="font-size:0.88rem;margin-top:8px">End a game and choose "Save &amp; New Game" to record it here.</div>
+      </div>`;
+    return;
+  }
+
+  // ── Season summary ──
+  let wins = 0, draws = 0, losses = 0;
+  const playerTotals = {}; // id → { name, number, totalSeconds, gamesPlayed }
+
+  gameHistory.forEach(game => {
+    if (game.ourScore > game.theirScore) wins++;
+    else if (game.ourScore < game.theirScore) losses++;
+    else draws++;
+
+    game.playerStats.forEach(ps => {
+      if (!playerTotals[ps.id]) {
+        playerTotals[ps.id] = { name: ps.name, number: ps.number, totalSeconds: 0, gamesPlayed: 0 };
+      }
+      if (ps.gameSeconds > 0) {
+        playerTotals[ps.id].totalSeconds += ps.gameSeconds;
+        playerTotals[ps.id].gamesPlayed++;
+      }
+    });
+  });
+
+  const totalGames = gameHistory.length;
+  const playerSummaryRows = Object.values(playerTotals)
+    .sort((a, b) => b.totalSeconds - a.totalSeconds)
+    .map(pt => `
+      <tr>
+        <td>#${pt.number} ${pt.name}</td>
+        <td>${fmtTime(pt.totalSeconds)}</td>
+        <td>${pt.gamesPlayed > 0 ? fmtTime(Math.round(pt.totalSeconds / pt.gamesPlayed)) : '0:00'}</td>
+        <td>${pt.gamesPlayed}</td>
+      </tr>`).join('');
+
+  // ── Game cards (most recent first) ──
+  const gameCards = [...gameHistory].reverse().map(game => {
+    const result = game.ourScore > game.theirScore ? 'win'
+                 : game.ourScore < game.theirScore ? 'loss' : 'draw';
+    const resultLabel = result === 'win' ? 'W' : result === 'loss' ? 'L' : 'D';
+    const duration = (game.halfDuration || 20) * 2;
+
+    const playerRows = [...game.playerStats]
+      .sort((a, b) => b.gameSeconds - a.gameSeconds)
+      .map((ps, i) => `
+        <tr class="${i % 2 === 0 ? 'row-even' : ''}">
+          <td>#${ps.number} ${ps.name}${ps.isGK ? ' <span class="gk-badge">🧤 GK</span>' : ''}</td>
+          <td>${fmtTime(ps.gameSeconds)}</td>
+          <td>${ps.subsCount}</td>
+        </tr>`).join('');
+
+    return `
+      <div class="history-game-card">
+        <div class="history-game-header">
+          <div>
+            <div class="history-game-title">vs ${game.opponent}</div>
+            <div class="history-game-meta">${game.date} · ${duration} min game</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <div class="history-score">${game.ourScore}–${game.theirScore}</div>
+            <div class="result-badge result-${result}">${resultLabel}</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="player-stats-table">
+            <thead><tr><th>Player</th><th>Time</th><th>Subs</th></tr></thead>
+            <tbody>${playerRows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="history-season-summary">
+      <div class="history-season-title">Season Summary</div>
+      <div class="history-record">
+        <div class="record-item"><div class="record-num">${totalGames}</div><div class="record-label">Games</div></div>
+        <div class="record-item"><div class="record-num" style="color:var(--on-color)">${wins}</div><div class="record-label">Wins</div></div>
+        <div class="record-item"><div class="record-num" style="color:var(--rest-color)">${draws}</div><div class="record-label">Draws</div></div>
+        <div class="record-item"><div class="record-num" style="color:var(--danger)">${losses}</div><div class="record-label">Losses</div></div>
+      </div>
+      <div class="section-title" style="margin-top:20px;margin-bottom:10px">Season Player Stats</div>
+      <div style="overflow-x:auto">
+        <table class="player-stats-table">
+          <thead><tr><th>Player</th><th>Total Time</th><th>Avg/Game</th><th>Games</th></tr></thead>
+          <tbody>${playerSummaryRows || '<tr><td colspan="4" style="color:var(--text-dim);font-style:italic">No player data yet.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="history-games-list">
+      <div class="section-title" style="margin-bottom:16px">Past Games</div>
+      ${gameCards}
+    </div>
+    <div style="text-align:center;padding:20px 0 40px">
+      <button class="btn btn-ghost" style="color:var(--danger);border-color:var(--danger)" onclick="clearHistory()">🗑 Clear All History</button>
+    </div>`;
+}
+
+function clearHistory() {
+  if (!confirm('Clear all game history? This cannot be undone.')) return;
+  gameHistory = [];
+  localStorage.removeItem('coachboard_history');
+  renderHistoryScreen();
+  showToast('History cleared.');
 }
 
 // ── UTILS ─────────────────────────────────────────────────────
@@ -1200,13 +1447,15 @@ function loadState() {
   const g  = localStorage.getItem('coachboard_gameSeconds');
   const h  = localStorage.getItem('coachboard_half');
   const n  = localStorage.getItem('coachboard_nextId');
+  const hist = localStorage.getItem('coachboard_history');
 
-  if (p)  players     = JSON.parse(p);
-  if (ps) playerState = JSON.parse(ps);
-  if (s)  settings    = JSON.parse(s);
-  if (g)  gameSeconds = parseInt(g);
-  if (h)  half        = parseInt(h);
-  if (n)  nextId      = parseInt(n);
+  if (p)    players     = JSON.parse(p);
+  if (ps)   playerState = JSON.parse(ps);
+  if (s)    settings    = JSON.parse(s);
+  if (g)    gameSeconds = parseInt(g);
+  if (h)    half        = parseInt(h);
+  if (n)    nextId      = parseInt(n);
+  if (hist) gameHistory = JSON.parse(hist);
 }
 
 // ── BOOT ──────────────────────────────────────────────────────
