@@ -1090,12 +1090,12 @@ function generateInsights(active, halfSecs, totalGameSecs) {
 
 // ── FAIR TIME & AUTO SUB ──────────────────────────────────────
 function calcFairTarget() {
-  const totalGameSecs = settings.halfDuration * 60 * 2;
+  const fullGameSecs = settings.halfDuration * 60 * 2;
   const nonGK = players.filter(p => p.available !== false && !p.isGK);
   if (nonGK.length === 0) return 0;
   const hasGK = players.some(p => p.isGK && p.available !== false);
   const outfieldSpots = Math.max(1, settings.maxOnPitch - (hasGK ? 1 : 0));
-  return Math.round(totalGameSecs * outfieldSpots / nonGK.length);
+  return Math.round(fullGameSecs * outfieldSpots / nonGK.length);
 }
 
 function getAutoSubSuggestion() {
