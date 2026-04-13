@@ -389,6 +389,143 @@
   .player-stats-table td { padding: 6px 10px; color: var(--text); }
   .player-stats-table tr.row-even td { background: rgba(255,255,255,0.03); }
   @media (max-width: 760px) { .history-body { padding: 16px; } .history-record { gap: 12px; } }
+
+  /* ── FORMATION BUILDER ── */
+  #formationScreen { display: none; position: fixed; inset: 0; z-index: 400; background: #111822; overflow-y: auto; }
+  #formationScreen.show { display: block; }
+  .formation-body { padding: 20px 24px; max-width: 900px; margin: 0 auto; }
+  .formation-controls { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 20px; }
+
+  .formation-pitch-wrap { display: flex; justify-content: center; margin-bottom: 24px; }
+  .formation-pitch {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 2/3;
+    background: #1a4a1a;
+    border: 3px solid #2d7a2d;
+    border-radius: 12px;
+    overflow: hidden;
+    /* Pitch markings */
+    background-image:
+      /* Center circle */
+      radial-gradient(circle at 50% 50%, transparent 14%, #2d7a2d 14.5%, transparent 15%),
+      /* Center line */
+      linear-gradient(to bottom, transparent 49.5%, #2d7a2d 49.5%, #2d7a2d 50.5%, transparent 50.5%),
+      /* Penalty areas */
+      linear-gradient(to right, transparent 20%, #2d7a2d 20%, #2d7a2d 20.5%, transparent 20.5%),
+      linear-gradient(to right, transparent 79.5%, #2d7a2d 79.5%, #2d7a2d 80%, transparent 80%),
+      linear-gradient(to bottom, transparent 8%, #2d7a2d 8%, #2d7a2d 8.5%, transparent 8.5%),
+      linear-gradient(to bottom, transparent 91.5%, #2d7a2d 91.5%, #2d7a2d 92%, transparent 92%);
+  }
+
+  .formation-slot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .formation-token {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--on-color);
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: #fff;
+    margin: 0 auto 3px;
+    transition: all 0.15s;
+    position: relative;
+    word-break: break-word;
+    text-align: center;
+    line-height: 1.2;
+    padding: 4px;
+  }
+  .formation-token.empty {
+    background: rgba(255,255,255,0.08);
+    border: 2px dashed rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.3);
+    font-size: 1.2rem;
+  }
+  .formation-token:hover { transform: scale(1.1); box-shadow: 0 0 12px rgba(74,144,217,0.6); }
+  .formation-slot-label {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .formation-bench {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .bench-player-chip {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .bench-player-chip:hover { border-color: var(--accent); background: var(--bench-light); }
+  .bench-player-chip.assigned { opacity: 0.4; cursor: default; border-color: var(--on-color); }
+  .bench-player-chip .chip-num { color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 1rem; }
+
+  /* Player picker mini modal for formation */
+  .formation-picker {
+    position: absolute;
+    background: var(--bench);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px;
+    z-index: 500;
+    min-width: 180px;
+    max-height: 240px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .formation-picker-item {
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .formation-picker-item:hover { background: var(--bench-light); }
+  .formation-picker-item.assigned { opacity: 0.4; pointer-events: none; }
+  .formation-picker-close {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    padding: 4px 10px;
+    cursor: pointer;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+    text-align: center;
+  }
+  .formation-picker-close:hover { color: var(--text); }
+
+  @media (max-width: 760px) {
+    .formation-body { padding: 16px; }
+    .formation-pitch { max-width: 100%; }
+    .formation-slot { width: 44px; }
+    .formation-token { width: 38px; height: 38px; font-size: 0.65rem; }
+  }
 </style>
 </head>
 <body>
@@ -399,6 +536,7 @@
     <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
     <button class="btn btn-ghost" onclick="openRoster()">👥 Roster</button>
     <button class="btn btn-ghost" onclick="openLineup()">📋 Lineup</button>
+    <button class="btn btn-ghost" onclick="openFormation()">⚽ Formation</button>
     <button class="btn btn-ghost" onclick="openHistory()">📅 History</button>
     <button class="btn btn-accent" onclick="resetGame()">↺ New Game</button>
   </div>
@@ -407,6 +545,7 @@
     <button class="btn btn-ghost" onclick="closeMobileMenu();openSettings()">⚙ Settings</button>
     <button class="btn btn-ghost" onclick="closeMobileMenu();openRoster()">👥 Roster</button>
     <button class="btn btn-ghost" onclick="closeMobileMenu();openLineup()">📋 Lineup</button>
+    <button class="btn btn-ghost" onclick="closeMobileMenu();openFormation()">⚽ Formation</button>
     <button class="btn btn-ghost" onclick="closeMobileMenu();openHistory()">📅 History</button>
     <button class="btn btn-accent" onclick="closeMobileMenu();resetGame()">↺ New Game</button>
   </div>
@@ -487,6 +626,47 @@
     <button class="btn btn-ghost" onclick="closeHistory()">✕ Close</button>
   </div>
   <div class="history-body" id="historyBody"></div>
+</div>
+
+<!-- ── FORMATION BUILDER SCREEN ── -->
+<div id="formationScreen">
+  <div class="lineup-header">
+    <h2>⚽ Formation Builder</h2>
+    <button class="btn btn-ghost" onclick="closeFormation()">✕ Close</button>
+  </div>
+  <div class="formation-body">
+    <div class="formation-controls">
+      <div class="form-group" style="margin-bottom:0;flex:1;min-width:160px">
+        <label>Formation</label>
+        <select id="formationSelect" onchange="applyFormation()">
+          <option value="4-3-3">4-3-3</option>
+          <option value="4-4-2">4-4-2</option>
+          <option value="3-4-3">3-4-3</option>
+          <option value="3-5-2">3-5-2</option>
+          <option value="4-2-3-1">4-2-3-1</option>
+          <option value="5-3-2">5-3-2</option>
+          <option value="2-3-2" selected>2-3-2 (7-a-side)</option>
+          <option value="3-2-1">3-2-1 (7-a-side)</option>
+          <option value="2-2-2">2-2-2 (7-a-side)</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost" onclick="clearFormation()">🗑 Clear</button>
+      <button class="btn btn-accent" onclick="applyFormationToLineup()">✔ Use as Lineup</button>
+    </div>
+
+    <!-- Visual pitch with drag-and-drop player tokens -->
+    <div class="formation-pitch-wrap">
+      <div class="formation-pitch" id="formationPitch">
+        <!-- Position slots rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Bench/unassigned players -->
+    <div class="formation-bench-wrap">
+      <div class="section-title" style="margin-bottom:10px">Available Players</div>
+      <div class="formation-bench" id="formationBench"></div>
+    </div>
+  </div>
 </div>
 
 <!-- END GAME MODAL -->
@@ -606,17 +786,17 @@
 let settings = { halfDuration: 20, maxOnPitch: 7, restTarget: 5 };
 
 let players = [
-  {id:1,name:'Alice',number:1,available:true,isGK:false},
-  {id:2,name:'Ben',number:2,available:true,isGK:false},
-  {id:3,name:'Cara',number:3,available:true,isGK:false},
-  {id:4,name:'Dan',number:4,available:true,isGK:false},
-  {id:5,name:'Eva',number:5,available:true,isGK:false},
-  {id:6,name:'Finn',number:6,available:true,isGK:false},
-  {id:7,name:'Grace',number:7,available:true,isGK:false},
-  {id:8,name:'Hugo',number:8,available:true,isGK:false},
-  {id:9,name:'Iris',number:9,available:true,isGK:false},
-  {id:10,name:'Jake',number:10,available:true,isGK:false},
-  {id:11,name:'Kira',number:11,available:true,isGK:false},
+  {id:1,  name:'Wyette', number:1,  available:true, isGK:false},
+  {id:2,  name:'Myles',  number:2,  available:true, isGK:false},
+  {id:3,  name:'Roman',  number:3,  available:true, isGK:false},
+  {id:4,  name:'Julian', number:4,  available:true, isGK:false},
+  {id:5,  name:'Joe',    number:5,  available:true, isGK:false},
+  {id:6,  name:'Kaiden', number:6,  available:true, isGK:false},
+  {id:7,  name:'Caiden', number:7,  available:true, isGK:false},
+  {id:8,  name:'Brian',  number:8,  available:true, isGK:false},
+  {id:9,  name:'Ryley',  number:9,  available:true, isGK:false},
+  {id:10, name:'Cai',    number:10, available:true, isGK:false},
+  {id:11, name:'River',  number:11, available:true, isGK:false},
 ];
 
 let playerState = {};   // id → { status, gameSeconds, restSeconds, subsCount }
@@ -1555,6 +1735,202 @@ function loadState() {
   if (h)    half        = parseInt(h);
   if (n)    nextId      = parseInt(n);
   if (hist) gameHistory = JSON.parse(hist);
+}
+
+// ── FORMATION BUILDER ─────────────────────────────────────────
+// formationAssignments: slotIndex → playerId (or null)
+let formationAssignments = {};
+let activePickerSlot = null;
+
+const FORMATIONS = {
+  '4-3-3':   { name:'4-3-3',   rows: [ {label:'FWD', count:3, y:15}, {label:'MID', count:3, y:38}, {label:'DEF', count:4, y:62}, {label:'GK', count:1, y:85} ] },
+  '4-4-2':   { name:'4-4-2',   rows: [ {label:'FWD', count:2, y:15}, {label:'MID', count:4, y:38}, {label:'DEF', count:4, y:62}, {label:'GK', count:1, y:85} ] },
+  '3-4-3':   { name:'3-4-3',   rows: [ {label:'FWD', count:3, y:15}, {label:'MID', count:4, y:38}, {label:'DEF', count:3, y:62}, {label:'GK', count:1, y:85} ] },
+  '3-5-2':   { name:'3-5-2',   rows: [ {label:'FWD', count:2, y:15}, {label:'MID', count:5, y:38}, {label:'DEF', count:3, y:62}, {label:'GK', count:1, y:85} ] },
+  '4-2-3-1': { name:'4-2-3-1', rows: [ {label:'ST', count:1, y:10}, {label:'ATM', count:3, y:28}, {label:'CDM', count:2, y:47}, {label:'DEF', count:4, y:65}, {label:'GK', count:1, y:85} ] },
+  '5-3-2':   { name:'5-3-2',   rows: [ {label:'FWD', count:2, y:15}, {label:'MID', count:3, y:40}, {label:'DEF', count:5, y:65}, {label:'GK', count:1, y:85} ] },
+  '2-3-2':   { name:'2-3-2',   rows: [ {label:'FWD', count:2, y:15}, {label:'MID', count:3, y:45}, {label:'DEF', count:2, y:72}, {label:'GK', count:1, y:88} ] },
+  '3-2-1':   { name:'3-2-1',   rows: [ {label:'FWD', count:1, y:15}, {label:'MID', count:2, y:45}, {label:'DEF', count:3, y:72}, {label:'GK', count:1, y:88} ] },
+  '2-2-2':   { name:'2-2-2',   rows: [ {label:'FWD', count:2, y:15}, {label:'MID', count:2, y:48}, {label:'DEF', count:2, y:72}, {label:'GK', count:1, y:88} ] },
+};
+
+function openFormation() {
+  renderFormationPitch();
+  renderFormationBench();
+  document.getElementById('formationScreen').classList.add('show');
+}
+
+function closeFormation() {
+  closePicker();
+  document.getElementById('formationScreen').classList.remove('show');
+}
+
+function applyFormation() {
+  formationAssignments = {};
+  renderFormationPitch();
+  renderFormationBench();
+}
+
+function clearFormation() {
+  formationAssignments = {};
+  renderFormationPitch();
+  renderFormationBench();
+}
+
+function getFormationSlots() {
+  const key = document.getElementById('formationSelect').value;
+  const f = FORMATIONS[key];
+  const slots = [];
+  f.rows.forEach(row => {
+    const spacing = 100 / (row.count + 1);
+    for (let i = 1; i <= row.count; i++) {
+      slots.push({ label: row.label, x: spacing * i, y: row.y });
+    }
+  });
+  return slots;
+}
+
+function renderFormationPitch() {
+  const pitch = document.getElementById('formationPitch');
+  pitch.innerHTML = '';
+  const slots = getFormationSlots();
+  slots.forEach((slot, idx) => {
+    const assignedId = formationAssignments[idx];
+    const player = assignedId ? players.find(p => p.id === assignedId) : null;
+    const div = document.createElement('div');
+    div.className = 'formation-slot';
+    div.style.left = slot.x + '%';
+    div.style.top  = slot.y + '%';
+    div.dataset.slot = idx;
+    div.innerHTML = `
+      <div class="formation-token ${player ? '' : 'empty'}" onclick="openPicker(${idx}, event)">
+        ${player ? `<span>${player.name}</span>` : '+'}
+      </div>
+      <div class="formation-slot-label">${slot.label}</div>
+    `;
+    if (player) {
+      div.querySelector('.formation-token').title = `#${player.number} ${player.name} — click to change`;
+    }
+    pitch.appendChild(div);
+  });
+}
+
+function renderFormationBench() {
+  const bench = document.getElementById('formationBench');
+  bench.innerHTML = '';
+  const assignedIds = new Set(Object.values(formationAssignments));
+  const available = players.filter(p => p.available !== false);
+  if (available.length === 0) {
+    bench.innerHTML = '<div class="empty-state">No available players. Set availability in Roster.</div>';
+    return;
+  }
+  available.forEach(p => {
+    const isAssigned = assignedIds.has(p.id);
+    const chip = document.createElement('div');
+    chip.className = 'bench-player-chip' + (isAssigned ? ' assigned' : '');
+    chip.innerHTML = `<span class="chip-num">${p.number}</span><span>${p.name}</span>${isAssigned ? ' ✓' : ''}`;
+    bench.appendChild(chip);
+  });
+}
+
+function openPicker(slotIdx, event) {
+  event.stopPropagation();
+  closePicker();
+  activePickerSlot = slotIdx;
+  const assignedIds = new Set(Object.values(formationAssignments));
+  const available = players.filter(p => p.available !== false);
+
+  const picker = document.createElement('div');
+  picker.className = 'formation-picker';
+  picker.id = 'formationPicker';
+
+  // "Remove" option if already assigned
+  if (formationAssignments[slotIdx]) {
+    const removeItem = document.createElement('div');
+    removeItem.className = 'formation-picker-item';
+    removeItem.style.color = 'var(--danger)';
+    removeItem.innerHTML = '✕ Remove player';
+    removeItem.onclick = () => { delete formationAssignments[slotIdx]; closePicker(); renderFormationPitch(); renderFormationBench(); };
+    picker.appendChild(removeItem);
+  }
+
+  available.forEach(p => {
+    const isAssigned = assignedIds.has(p.id) && formationAssignments[slotIdx] !== p.id;
+    const item = document.createElement('div');
+    item.className = 'formation-picker-item' + (isAssigned ? ' assigned' : '');
+    item.innerHTML = `<span style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:1rem">${p.number}</span> ${p.name}`;
+    if (!isAssigned) {
+      item.onclick = () => {
+        // If this player was already assigned to another slot, free that slot
+        Object.keys(formationAssignments).forEach(k => {
+          if (formationAssignments[k] === p.id) delete formationAssignments[k];
+        });
+        formationAssignments[slotIdx] = p.id;
+        closePicker();
+        renderFormationPitch();
+        renderFormationBench();
+      };
+    }
+    picker.appendChild(item);
+  });
+
+  const closeItem = document.createElement('div');
+  closeItem.className = 'formation-picker-close';
+  closeItem.textContent = 'Cancel';
+  closeItem.onclick = closePicker;
+  picker.appendChild(closeItem);
+
+  // Position picker near the clicked slot
+  const slot = event.currentTarget.closest('.formation-slot');
+  const pitchRect = document.getElementById('formationPitch').getBoundingClientRect();
+  const slotRect  = slot.getBoundingClientRect();
+
+  document.getElementById('formationPitch').appendChild(picker);
+
+  // Position after appending so we have picker dimensions
+  let left = slotRect.left - pitchRect.left + slotRect.width / 2;
+  let top  = slotRect.top  - pitchRect.top  + slotRect.height;
+  // Clamp so it doesn't go off the right edge
+  const pickerW = picker.offsetWidth || 180;
+  if (left + pickerW > pitchRect.width) left = pitchRect.width - pickerW - 8;
+  if (left < 4) left = 4;
+  picker.style.left = left + 'px';
+  picker.style.top  = top  + 'px';
+}
+
+function closePicker() {
+  const p = document.getElementById('formationPicker');
+  if (p) p.remove();
+  activePickerSlot = null;
+}
+
+// Close picker when clicking outside
+document.addEventListener('click', function(e) {
+  if (activePickerSlot !== null && !e.target.closest('#formationPicker') && !e.target.closest('.formation-token')) {
+    closePicker();
+  }
+});
+
+function applyFormationToLineup() {
+  const assignedIds = new Set(Object.values(formationAssignments));
+  if (assignedIds.size === 0) {
+    showToast('Assign players to positions first.');
+    return;
+  }
+  // Apply as lineup: assigned players → 'on', others stay as-is but off pitch
+  players.forEach(p => {
+    const s = playerState[p.id];
+    if (assignedIds.has(p.id)) {
+      s.status = 'on';
+    } else if (s.status === 'on') {
+      s.status = 'off';
+      s.restSeconds = 0;
+    }
+  });
+  closeFormation();
+  renderAll();
+  saveState();
+  showToast(`✅ Formation applied — ${assignedIds.size} players on pitch.`);
 }
 
 // ── BOOT ──────────────────────────────────────────────────────
